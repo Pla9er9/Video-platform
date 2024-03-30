@@ -20,37 +20,39 @@ import { useState } from "react";
 export default function Registration() {
     const [step, setStep] = useState(0);
 
-    const formSchema = z.object({
-        username: z
-            .string()
-            .min(2, {
-                message: "Username must be at least 2 characters.",
-            })
-            .max(12, {
-                message: "Username must be max 12 characters",
-            }),
-        password: z
-            .string()
-            .min(2, {
-                message: "Password must be at least 8 characters.",
-            })
-            .max(50, {
-                message: "Password must be max 50 characters",
-            }),
-        confirmPassword: z.string(),
-        email: z.string().email(),
-        firstname: z
-            .string()
-            .min(2, {
-                message: "Name must be at least 2 characters",
-            })
-            .max(12, {
-                message: "Name must be max 12 characters",
-            }),
-    }).refine(data => data.password === data.confirmPassword, {
-        message: "Passwords don't match",
-        path: ["confirmPassword"]
-    })
+    const formSchema = z
+        .object({
+            username: z
+                .string()
+                .min(2, {
+                    message: "Username must be at least 2 characters.",
+                })
+                .max(12, {
+                    message: "Username must be max 12 characters",
+                }),
+            password: z
+                .string()
+                .min(2, {
+                    message: "Password must be at least 8 characters.",
+                })
+                .max(50, {
+                    message: "Password must be max 50 characters",
+                }),
+            confirmPassword: z.string(),
+            email: z.string().email(),
+            firstname: z
+                .string()
+                .min(2, {
+                    message: "Name must be at least 2 characters",
+                })
+                .max(12, {
+                    message: "Name must be max 12 characters",
+                }),
+        })
+        .refine((data) => data.password === data.confirmPassword, {
+            message: "Passwords don't match",
+            path: ["confirmPassword"],
+        });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -63,8 +65,24 @@ export default function Registration() {
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        alert("Registered");
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        const res = await fetch("/api/auth/registration", {
+            method: "post",
+            body: JSON.stringify({
+                username: values.username,
+                password: values.password,
+                firstname: values.firstname,
+                email: values.email,
+            }),
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+            window.location.replace("/")
+        }
     }
 
     return (
@@ -79,7 +97,9 @@ export default function Registration() {
                         control={form.control}
                         name="username"
                         render={({ field }) => (
-                            <FormItem className={step === 0 ? "block" : "hidden"}>
+                            <FormItem
+                                className={step === 0 ? "block" : "hidden"}
+                            >
                                 <FormLabel>Username</FormLabel>
                                 <FormControl>
                                     <Input
@@ -93,22 +113,11 @@ export default function Registration() {
                     />
                     <FormField
                         control={form.control}
-                        name="firstname"
-                        render={({ field }) => (
-                            <FormItem className={step === 0 ? "block" : "hidden"}>
-                                <FormLabel>Firstname</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Alex" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
                         name="email"
                         render={({ field }) => (
-                            <FormItem className={step === 0 ? "block" : "hidden"}>
+                            <FormItem
+                                className={step === 0 ? "block" : "hidden"}
+                            >
                                 <FormLabel>Email</FormLabel>
                                 <FormControl>
                                     <Input
@@ -122,15 +131,33 @@ export default function Registration() {
                     />
                     <FormField
                         control={form.control}
+                        name="firstname"
+                        render={({ field }) => (
+                            <FormItem
+                                className={step === 0 ? "block" : "hidden"}
+                            >
+                                <FormLabel>Firstname</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Alex" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
                         name="password"
                         render={({ field }) => (
-                            <FormItem className={step === 1 ? "block" : "hidden"}>
+                            <FormItem
+                                className={step === 1 ? "block" : "hidden"}
+                            >
                                 <FormLabel>Password</FormLabel>
                                 <FormControl>
                                     <Input
                                         placeholder="Secure password"
                                         {...field}
                                         type="password"
+                                        autoComplete="on"
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -141,13 +168,16 @@ export default function Registration() {
                         control={form.control}
                         name="confirmPassword"
                         render={({ field }) => (
-                            <FormItem className={step === 1 ? "block" : "hidden"}>
+                            <FormItem
+                                className={step === 1 ? "block" : "hidden"}
+                            >
                                 <FormLabel>Confirm Password</FormLabel>
                                 <FormControl>
                                     <Input
                                         placeholder="Same password"
                                         {...field}
                                         type="password"
+                                        autoComplete="on"
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -169,10 +199,14 @@ export default function Registration() {
                     <Button
                         type={step === 0 ? "button" : "submit"}
                         className="w-full"
-                        onClick={step === 0 ? (e) => {
-                            e.preventDefault()
-                            setStep(1)
-                        } : undefined}
+                        onClick={
+                            step === 0
+                                ? (e) => {
+                                      e.preventDefault();
+                                      setStep(1);
+                                  }
+                                : undefined
+                        }
                     >
                         {step === 0 && form ? "Next" : "Sign up"}
                     </Button>
