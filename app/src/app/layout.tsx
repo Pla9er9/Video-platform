@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
 
     const cookieStore = cookies()
-    const jwt = cookieStore.get('jwtToken')!.value
+    const jwt = cookieStore.get('jwtToken')?.value
 
     return (
         <html lang="en">
