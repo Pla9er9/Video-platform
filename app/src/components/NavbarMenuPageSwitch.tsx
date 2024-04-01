@@ -14,7 +14,8 @@ export default function MenuPageSwitch({ children, token }) {
     return (
         <>
             <Navbar onClick={() => setMenuActive(!menuActive)} />
-            {menuActive ? <Menu /> : children}
+            <div className={!menuActive ? "hidden" : "block"}><Menu /></div>
+            <div className={menuActive ? "hidden" : "block"}>{children}</div>
         </>
     );
 }
