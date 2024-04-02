@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import FormTittle from "@/components/FormTittle";
+import Title from "@/components/Title";
 import { useState } from "react";
 
 export default function Registration() {
@@ -87,7 +87,7 @@ export default function Registration() {
 
     return (
         <Main>
-            <FormTittle text="Create account" />
+            <Title text="Create account" />
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}

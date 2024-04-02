@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import FormTittle from "@/components/FormTittle";
+import Title from "@/components/Title";
 
 export default function Login() {
     const formSchema = z.object({
@@ -40,7 +40,7 @@ export default function Login() {
 
     return (
         <Main>
-            <FormTittle text="Welcome back!" />
+            <Title text="Welcome back!" />
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}

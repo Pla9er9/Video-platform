@@ -1,10 +1,10 @@
-import FormTittle from "@/components/FormTittle";
+import Title from "@/components/Title";
 import Main from "@/components/Main";
 
 export default function NotFound() {
     return (
         <Main>
-            <FormTittle text="Not found" className="text-7xl" />
+            <Title text="Not found" className="text-7xl" />
         </Main>
     )
 }
