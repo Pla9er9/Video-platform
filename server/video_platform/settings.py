@@ -27,6 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+MAX_UPLOAD_SIZE = 52428800
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
 
 # Application definition
 
@@ -39,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'user'
+    'user',
+    'video'
 ]
 
 MIDDLEWARE = [
