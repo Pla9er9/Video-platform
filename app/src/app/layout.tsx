@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Providers } from "@/components/redux/provider";
 import MenuPageSwitch from "@/components/NavbarMenuPageSwitch";
 import { cookies } from 'next/headers'
+import { Toaster } from "@/components/ui/toaster";
 
 const fontSans = FontSans({
     subsets: ["latin"],
@@ -18,6 +19,7 @@ export default function RootLayout({
 
     const cookieStore = cookies()
     const jwt = cookieStore.get('jwtToken')?.value
+    const username = jwt ? cookieStore.get('username')?.value : undefined
 
     return (
         <html lang="en">
@@ -28,8 +30,9 @@ export default function RootLayout({
                 )}
             >
                 <Providers>
-                    <MenuPageSwitch token={jwt}>
+                    <MenuPageSwitch token={jwt} username={username}>
                         {children}
+                        <Toaster />
                     </MenuPageSwitch>
                 </Providers>
             </body>

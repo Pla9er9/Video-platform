@@ -6,10 +6,10 @@ import Menu from "./Menu";
 import { useDispatch } from "react-redux";
 import { setToken } from "@/lib/store";
 
-export default function MenuPageSwitch({ children, token }) {
+export default function MenuPageSwitch({ children, token, username }) {
     const [menuActive, setMenuActive] = useState(false);
     const dispatch = useDispatch()
-    dispatch(setToken(token))
+    dispatch(setToken({token: token, username: username}))
 
     return (
         <>

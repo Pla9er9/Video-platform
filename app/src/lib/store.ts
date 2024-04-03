@@ -20,12 +20,8 @@ const tokenSlice = createSlice({
             state.username = undefined
         },
         setToken: (state, action) => {
-            state.value = action.payload
-            try {
-                state.username = JSON.parse(atob(action.payload.split('.')[1])).sub;
-            } catch {
-                state.username = undefined
-            }
+            state.value = action.payload.token
+            state.username = action.payload.username
         }
     }
 })

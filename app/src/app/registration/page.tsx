@@ -16,9 +16,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Title from "@/components/Title";
 import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Registration() {
     const [step, setStep] = useState(0);
+    const { toast } = useToast()
 
     const formSchema = z
         .object({
@@ -79,10 +81,15 @@ export default function Registration() {
             },
         });
 
-        const data = await res.json();
         if (res.ok) {
             window.location.replace("/")
+            return
         }
+        toast({
+            variant: "destructive",
+            title: "Registration failed",
+            description: "",
+            })
     }
 
     return (
