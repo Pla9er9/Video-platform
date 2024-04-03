@@ -14,7 +14,8 @@ export default async function fetchHttp(
 		noContentType = false,
 		redirecting = false,
         contentType = 'application/json;charset=UTF-8',
-		headers = {}
+		headers = {},
+		cacheOption = 'no-cache'
     }
 
 ): Promise<response> {
@@ -43,7 +44,8 @@ export default async function fetchHttp(
 				Authorization: auth,
 				...headers
 			},
-			redirect: 'follow'
+			redirect: 'follow',
+			cache: cacheOption
 		});
 	} else {
 		res = await fetch(apiPrefix + url, {
@@ -54,7 +56,8 @@ export default async function fetchHttp(
 				'Content-type': contentType,
 				...headers
 			},
-			redirect: 'follow'
+			redirect: 'follow',
+			cache: cacheOption
 		});
 	}
 	if (res.redirected) {
