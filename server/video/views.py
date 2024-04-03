@@ -1,3 +1,7 @@
+import os
+import re
+from sage_stream import settings
+from django.conf import settings as django_settings
 from django.http import HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -8,6 +12,7 @@ from rest_framework import status
 from video_platform.serializers import VideoSerializer
 from django.shortcuts import get_object_or_404
 from .models import Video
+from sage_stream.utils.stream_services import get_streaming_response
 
 allowedMiniatureFormats = ["png", "jpg"]
 allowedVideoFormats = ["mp4"]
@@ -31,9 +36,11 @@ def getVideoData(request, id):
         "id": video.id,
         "title": video.title,
         "description": video.description,
-        "tags": video.tags,
         "isPrivate": video.isPrivate,
-        "created": video.created
+        "created": video.created,
+        "views": video.views,
+        "likes": video.likes,
+        "dislikes": video.dislikes
     })
 
 @api_view(['POST'])
@@ -93,7 +100,6 @@ def getMiniature(request, id):
     if (video.isPrivate):
         return Response(status=404)
 
-    _file = None
     for format in allowedMiniatureFormats:
         try:
             with open(f'media/miniatures/{id}.{format}', 'rb') as f:
@@ -102,3 +108,25 @@ def getMiniature(request, id):
             continue
 
     return Response(status=404)
+
+@api_view(['GET'])
+def getVideoStream(request, id):
+    video = get_object_or_404(Video, id=id)
+
+    if (video.isPrivate):
+        return Response(status=404)
+
+    max_load_volume = settings.STREAM_MAX_LOAD_VOLUME
+    range_re_pattern = settings.STREAM_RANGE_HEADER_REGEX_PATTERN
+
+    video_path = f'media/videos/{id}.mp4'
+    video_path = os.path.join(django_settings.BASE_DIR, video_path)
+    range_header = request.META.get('HTTP_RANGE', '').strip()
+    range_re = re.compile(range_re_pattern, re.I)
+
+    return get_streaming_response(
+        path=video_path,
+        range_header=range_header,
+        range_re=range_re,
+        max_load_volume=max_load_volume,
+    )

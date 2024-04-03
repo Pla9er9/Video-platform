@@ -11,4 +11,5 @@ urlpatterns = [
     path("video/<uuid:id>/upload/video", video.uploadVideo),
     path("video/<uuid:id>/upload/miniature", video.uploadMiniature),
     path("video/<uuid:id>/miniature", video.getMiniature),
+    path("video/<uuid:id>/v", video.getVideoStream)
 ]
