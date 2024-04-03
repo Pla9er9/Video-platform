@@ -1,0 +1,21 @@
+#description {
+    color: hsl(var(--muted-foreground));
+    width: 100%;
+    font-size: 14px;
+    margin: 20px 0;
+    padding: 0 10px;
+    white-space: pre-line;
+
+    a {
+        color: rgb(59, 148, 250);
+        transition: 100ms ease-in-out;
+
+        &:hover {
+            color: rgb(28, 116, 218);
+        }
+    }
+
+    .tag {
+        color: rgb(59, 148, 250);
+    }
+}
