@@ -15,8 +15,11 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import Title from "@/components/Title";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Login() {
+    const { toast } = useToast()
+
     const formSchema = z.object({
         username: z.string().min(2, {
           message: "Username must be at least 2 characters.",
@@ -34,8 +37,28 @@ export default function Login() {
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        const res = await fetch("/api/auth/login", {
+            method: "post",
+            body: JSON.stringify({
+                username: values.username,
+                password: values.password,
+            }),
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (res.ok) {
+            window.location.replace("/")
+            return
+        }
+
+        toast({
+            variant: "destructive",
+            title: "Login failed",
+            description: "Wrong username or password",
+            })
       }
 
     return (
