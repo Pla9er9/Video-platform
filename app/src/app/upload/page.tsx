@@ -19,11 +19,17 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Image from "next/image";
+import fetchHttp from "@/lib/fetchHttp";
+import { useSelector } from "react-redux";
+import { RootState } from "@/lib/store";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Upload() {
     const [step, setStep] = useState(0);
     const [miniature, setMiniature] = useState<File | null>(null);
     const [video, setVideo] = useState<File | null>(null);
+    const token = useSelector((state: RootState) => state.token.value);
+    const { toast } = useToast();
 
     const formSchema = z.object({
         title: z.string().min(2).max(50),
@@ -38,8 +44,65 @@ export default function Upload() {
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values);
+    function getErrorToast(title: string) {
+        return toast({
+            variant: "destructive",
+            title: title,
+            description: "Try later",
+        });
+    }
+
+    function getSuccesToast(description: string) {
+        return toast({
+            description: "✅ - " + description,
+        });
+    }
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        let formData = new FormData()
+        const b: any = ""
+        let options = {
+            method: "POST",
+            token: token,
+            body: b,
+            stringify: false,
+            contentType: "application/json;charset=UTF-8"
+        };
+        options.body = JSON.stringify({
+            title: values.title,
+            description: values.description,
+            isPrivate: false,
+        });
+
+        let res = await fetchHttp("/video/new", options);
+        if (!res.ok) {
+            getErrorToast("Failed to create video")
+            return
+        }
+        getSuccesToast("Video informations uploaded, uploading miniature")
+
+        const id = res.body.id
+
+        // @ts-ignore
+        formData.append('file', miniature)
+        options.body = formData
+        res = await fetchHttp(`/video/${id}/upload/miniature`, {...options, noContentType: true})
+        if (!res.ok) {
+            getErrorToast("Error while uploading miniature")
+        } else {
+            getSuccesToast("Miniature uploaded, uploading video")
+        }
+        
+        // @ts-ignore
+        formData.set('file', video)
+        options.body = formData
+        res = await fetchHttp(`/video/${id}/upload/video`, {...options, noContentType: true})
+        if (!res.ok) {
+            getErrorToast("Error while uploading video")
+            return
+        } 
+        getSuccesToast("Video succesfully uploaded")
+        form.reset()
     }
 
     return (
@@ -94,12 +157,12 @@ export default function Upload() {
                             <Label>Choose video</Label>
                             <div className="column">
                                 <Input
-                                    onChange={(e) =>
-                                        setVideo(e.target.files[0])
-                                    }
+                                    onChange={(e) => {
+                                        if (e.target.files) setVideo(e.target.files[0])
+                                    }}
                                     style={{ height: "80px" }}
                                     type="file"
-                                    accept="video/*"
+                                    accept="video/mp4"
                                 />
                                 {video ? (
                                     <>
@@ -122,7 +185,7 @@ export default function Upload() {
                             <div className="row">
                                 <Input
                                     onChange={(e) => {
-                                        setMiniature(e.target.files[0]);
+                                        if (e.target.files) setMiniature(e.target.files[0]);
                                     }}
                                     style={{ height: "80px" }}
                                     type="file"
