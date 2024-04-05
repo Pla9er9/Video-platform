@@ -17,6 +17,23 @@ from sage_stream.utils.stream_services import get_streaming_response
 allowedMiniatureFormats = ["png", "jpg"]
 allowedVideoFormats = ["mp4"]
 
+@api_view(['GET'])
+def getAllVideos(request):
+    videos = Video.objects.filter(isPrivate=False)
+    res = []
+    for v in videos:
+        res.append({
+        "id": v.id,
+        "title": v.title,
+        "created": v.created,
+        "views": v.views,
+        "creator": {
+            "username": v.creator.username
+        }
+        })
+        
+    return Response(res)
+
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
