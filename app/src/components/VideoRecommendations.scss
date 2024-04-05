@@ -1,0 +1,52 @@
+
+.videoRecommendation {
+    width: 100%;
+    max-width: 360px;
+    border-radius: 10px;
+    margin: 1rem;
+    padding-bottom: 1rem;
+    border: solid 1px #ffffff10;
+    border-top: 0;
+    
+    .title {
+        font-size: 15px;
+        font-weight: 600;
+        align-self: flex-start;
+    }
+    
+    .miniature {
+        width: 100%;
+        height: 11rem;
+        border-radius: 10px;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+}
+
+
+.avatar {
+    width: 35px;
+    height: 35px;
+    margin-top: 1px;
+}
+
+.channelOwner {
+    min-width: max-content;
+    transition: 150ms;
+    align-self: flex-start;
+    margin-top: 2px;
+}
+
+.channelOwner:hover {
+    color: #fff;
+    transform: scale(103%);
+}
+
+p, .channelOwner {
+    color: hsl(var(--muted-foreground));
+    font-size: 12px;
+}
+
+.date {
+    min-width: "max-content";
+}
