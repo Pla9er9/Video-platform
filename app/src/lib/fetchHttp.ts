@@ -23,7 +23,7 @@ export default async function fetchHttp(
 	let apiPrefix = '';
 	let stringBody = '';
     
-	if (apiUrlPrefix) apiPrefix = process.env.PUBLIC_API_URL ?? "";
+	if (apiUrlPrefix) apiPrefix = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 	if (token !== '' && token !== undefined) auth = 'token ' + token;
 
