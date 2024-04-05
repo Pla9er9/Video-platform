@@ -13,8 +13,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import Description from "@/components/Description";
 
-async function getData() {
-    const res = await fetchHttp(`/video/7982febc-6b6e-40e4-995c-1fc9a80a0874`, {
+async function getData(id: string) {
+    const res = await fetchHttp(`/video/${id}`, {
         server: true,
     });
 
@@ -25,11 +25,18 @@ async function getData() {
     return res.body;
 }
 
-export default async function Watch() {
-    const data = await getData();
-    
+export default async function Watch({
+    searchParams,
+  }: {
+    searchParams?: { [key: string]: string | undefined };
+  }) {
+    const videoId = searchParams?.videoId
+    if (!videoId) {
+        redirect("/404");
+    }
+    const data = await getData(videoId)
     const exampleVideoUrl =
-        `${process.env.PUBLIC_API_URL}/video/7982febc-6b6e-40e4-995c-1fc9a80a0874/v`
+        `${process.env.NEXT_PUBLIC_API_URL}/video/${videoId}/v`
 
     return (
         <Main classname="p-[0] items-start">
