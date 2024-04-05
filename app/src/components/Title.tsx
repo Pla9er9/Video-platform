@@ -1,4 +1,4 @@
-function FormTittle(props: {
+function Tittle(props: {
     text: string,
     className?: string
     }) {
@@ -13,4 +13,4 @@ function FormTittle(props: {
     );
 }
 
-export default FormTittle;
+export default Tittle;
