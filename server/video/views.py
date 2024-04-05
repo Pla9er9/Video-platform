@@ -25,8 +25,8 @@ def createVideo(request):
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    serializer.save(creator=request.user)
-    return Response()
+    video = serializer.save(creator=request.user)
+    return Response({ "id": video.id })
 
 @api_view(['GET'])
 def getVideoData(request, id):
