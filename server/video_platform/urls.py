@@ -1,6 +1,7 @@
 from django.urls import re_path
 from . import views
 import video.views as video
+import user.views as user
 from django.urls import path
 
 urlpatterns = [
@@ -12,5 +13,7 @@ urlpatterns = [
     path("video/<uuid:id>/upload/video", video.uploadVideo),
     path("video/<uuid:id>/upload/miniature", video.uploadMiniature),
     path("video/<uuid:id>/miniature", video.getMiniature),
-    path("video/<uuid:id>/v", video.getVideoStream)
+    path("video/<uuid:id>/v", video.getVideoStream),
+    path("user/<str:username>", user.getUser),
+    path("user/<str:username>/videos", user.getUsersVideos)
 ]
