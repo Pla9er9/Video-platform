@@ -17,21 +17,11 @@ from sage_stream.utils.stream_services import get_streaming_response
 allowedMiniatureFormats = ["png", "jpg"]
 allowedVideoFormats = ["mp4"]
 
+
 @api_view(['GET'])
 def getAllVideos(request):
     videos = Video.objects.filter(isPrivate=False)
-    res = []
-    for v in videos:
-        res.append({
-        "id": v.id,
-        "title": v.title,
-        "created": v.created,
-        "views": v.views,
-        "creator": {
-            "username": v.creator.username
-        }
-        })
-        
+    res = [videoToDto(v) for v in videos]
     return Response(res)
 
 @api_view(['POST'])
@@ -43,7 +33,8 @@ def createVideo(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     video = serializer.save(creator=request.user)
-    return Response({ "id": video.id })
+    return Response({"id": video.id})
+
 
 @api_view(['GET'])
 def getVideoData(request, id):
@@ -59,6 +50,7 @@ def getVideoData(request, id):
         "likes": video.likes,
         "dislikes": video.dislikes
     })
+
 
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
@@ -78,12 +70,13 @@ def uploadVideo(request, id):
 
     if fileFormat not in allowedVideoFormats:
         return Response({
-            "message" : "Not allowed file format. Allowed is only `mp4`"
+            "message": "Not allowed file format. Allowed is only `mp4`"
         }, status=400)
 
     video.videoUploaded = True
     video.save()
     return Response()
+
 
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
@@ -99,16 +92,17 @@ def uploadMiniature(request, id):
 
     if fileFormat not in allowedMiniatureFormats:
         return Response({
-            "message" : "Not allowed file format. Allowed are only `png` and `jpg`"
+            "message": "Not allowed file format. Allowed are only `png` and `jpg`"
         }, status=400)
 
     with open(f'media/miniatures/{id}.png', 'wb+') as destination:
         for chunk in request.FILES['file'].chunks():
             destination.write(chunk)
-    
+
     video.miniatureUploaded = True
     video.save()
     return Response()
+
 
 @api_view(['GET'])
 def getMiniature(request, id):
@@ -125,6 +119,7 @@ def getMiniature(request, id):
             continue
 
     return Response(status=404)
+
 
 @api_view(['GET'])
 def getVideoStream(request, id):
@@ -147,3 +142,15 @@ def getVideoStream(request, id):
         range_re=range_re,
         max_load_volume=max_load_volume,
     )
+
+
+def videoToDto(video: Video):
+    return {
+        "id": video.id,
+        "title": video.title,
+        "created": video.created,
+        "views": video.views,
+        "creator": {
+            "username": video.creator.username
+        }
+    }
