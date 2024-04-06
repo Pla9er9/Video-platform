@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import Image from "next/image";
 import "./VideoRecommendations.scss";
 
-export default function VideoRecommendation(props: { data: any }) {
+export default function VideoRecommendation(props: {
+    data: any;
+    withoutCreator?: boolean;
+}) {
     return (
-        <div className="videoRecommendation column">
+        <div className={`videoRecommendation column ${props.withoutCreator ? "pb-3" : "pb-4"}`}>
             <Link
                 href={"/watch?videoId=" + props.data.id}
                 className="miniature"
@@ -21,27 +23,35 @@ export default function VideoRecommendation(props: { data: any }) {
                 className="row w-full mt-2 px-2"
                 style={{ alignItems: "flex-start" }}
             >
-                <Link href={`/@${props.data.creator.username}`}>
-                    <Avatar className="avatar">
-                        <AvatarImage src="" alt="@shadcn" />
-                        <AvatarFallback style={{ fontSize: "12px" }}>
-                            {props.data.creator.username?.slice(0, 2)}
-                        </AvatarFallback>
-                    </Avatar>
-                </Link>
-                <div className="column ml-3 w-full">
+                {props.withoutCreator ? (
+                    <></>
+                ) : (
+                    <Link href={`/@${props.data.creator.username}`}>
+                        <Avatar className="avatar">
+                            <AvatarImage src="" alt="@shadcn" />
+                            <AvatarFallback style={{ fontSize: "12px" }}>
+                                {props.data.creator.username?.slice(0, 2)}
+                            </AvatarFallback>
+                        </Avatar>
+                    </Link>
+                )}
+                <div className={`column ${props.withoutCreator ? "ml-2" : "ml-3"} w-full`}>
                     <Link
                         href={"/watch?videoId=" + props.data.id}
                         className="title"
                     >
                         {props.data.title}
                     </Link>
-                    <Link
-                        href={`/@${props.data.creator.username}`}
-                        className="channelOwner"
-                    >
-                        {props.data.creator.username}
-                    </Link>
+                    {props.withoutCreator ? (
+                        <></>
+                    ) : (
+                        <Link
+                            href={`/@${props.data.creator.username}`}
+                            className="channelOwner"
+                        >
+                            {props.data.creator.username}
+                        </Link>
+                    )}
                     <p className="w-full row justify-between">
                         <span>{props.data.views} views</span>
                         <span className="date">
