@@ -1,0 +1,15 @@
+h1 {
+    font-weight: 600;
+    font-size: 26px;
+}
+
+p {
+    color: hsl(var(--muted-foreground));
+    font-size: 13px;
+}
+
+.textData {
+    min-width: max-content;
+    margin: 0 auto 0 2rem;
+    align-items: flex-start;
+}
