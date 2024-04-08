@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import Description from "@/components/Description";
+import Comments from "@/components/Comments"
 
 async function getData(id: string) {
     const res = await fetchHttp(`/video/${id}`, {
@@ -77,13 +78,15 @@ export default async function Watch({
                             <Description text={data.description} />
                         </AccordionContent>
                     </AccordionItem>
-                    <AccordionItem value="item-2">
-                        <AccordionTrigger>Comments</AccordionTrigger>
-                        <AccordionContent>Comments</AccordionContent>
-                    </AccordionItem>
                     <AccordionItem value="item-3">
                         <AccordionTrigger>Recomendations</AccordionTrigger>
                         <AccordionContent>Recomendations</AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="item-2">
+                        <AccordionTrigger>Comments</AccordionTrigger>
+                        <AccordionContent>
+                            <Comments videoId={videoId} />
+                        </AccordionContent>
                     </AccordionItem>
                 </Accordion>
             </div>
