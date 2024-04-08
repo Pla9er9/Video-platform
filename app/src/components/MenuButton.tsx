@@ -13,7 +13,7 @@ export default function MenuButton({ onClick }) {
     const size = "h-5 w-5"
 
     return (
-        <Button variant="ghost" size="icon" onClick={click} className="menuBtn">
+        <Button variant="ghost" size="icon" onClick={click} className="mx-2">
             {!clicked ? (
                 <MenuIcon className={size} />
             ) : (
