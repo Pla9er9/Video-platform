@@ -19,8 +19,15 @@ export async function POST(request: Request) {
         });
     }
 
-    cookieStore.set("jwtToken", json.token, { secure: true, httpOnly: true });
-    cookieStore.set("username", json.user.username);
+    var a = new Date();
+    a = new Date(a.getTime() + 1000 * 60 * 60 * 24 * 365);
+
+    cookieStore.set("jwtToken", json.token, {
+        secure: true,
+        httpOnly: true,
+        expires: a,
+    });
+    cookieStore.set("username", json.user.username, { expires: a });
 
     return Response.json({ token: json.token });
 }
