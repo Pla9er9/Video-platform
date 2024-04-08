@@ -15,3 +15,19 @@ class Video(models.Model):
     views = models.IntegerField(default=0)
     likes = models.IntegerField(default=0)
     dislikes = models.IntegerField(default=0)
+
+class Comment(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    text = models.CharField(blank=False)
+    postedDate = models.DateTimeField(default=timezone.now)
+    author = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    replyingTo = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
+    hasReplays = models.BooleanField(default=False)
+    video = models.ForeignKey(Video, on_delete=models.CASCADE, default=None)
+
+class Playlist(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    name = models.CharField(blank=False)
+    isPrivate = models.BooleanField(default=True)
+    author = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    createdDate = models.DateTimeField(default=timezone.now)

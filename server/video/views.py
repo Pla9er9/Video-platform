@@ -9,9 +9,9 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from video_platform.serializers import VideoSerializer
+from video_platform.serializers import CommentSerializer, VideoSerializer
 from django.shortcuts import get_object_or_404
-from .models import Video
+from .models import Video, Comment
 from sage_stream.utils.stream_services import get_streaming_response
 
 allowedMiniatureFormats = ["png", "jpg"]
@@ -24,6 +24,7 @@ def getAllVideos(request):
     res = [videoToDto(v) for v in videos]
     return Response(res)
 
+
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -35,6 +36,19 @@ def createVideo(request):
     video = serializer.save(creator=request.user)
     return Response({"id": video.id})
 
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAccountVideos(request):
+    videos = Video.objects.filter(creator__username=request.user.username)
+    return Response([videoToDto(v) for v in videos])
+
+@api_view(['GET'])
+def getUsersVideos(request, username):
+    videos = Video.objects.filter(isPrivate=False, creator__username=username)
+    res = [videoToDto(v) for v in videos]
+    return Response(res)
 
 @api_view(['GET'])
 def getVideoData(request, id):
@@ -142,6 +156,47 @@ def getVideoStream(request, id):
         range_re=range_re,
         max_load_volume=max_load_volume,
     )
+
+
+@api_view(['GET'])
+def getComments(request, id):
+    comments = []
+    replyingTo = request.GET.get('replyingTo')
+    if (replyingTo):
+        comments = Comment.objects.filter(
+            video__id=id, video__isPrivate=False, replyingTo__id=replyingTo)
+    else:
+        comments = Comment.objects.filter(video__id=id, video__isPrivate=False)
+
+    return Response([commentToDto(c) for c in comments])
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def postComment(request, id):
+    video = get_object_or_404(Video, id=id)
+    if (video.isPrivate):
+        return Response(status=404)
+
+    serializer = CommentSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    comment = serializer.save(
+        author=request.user, replyingTo=request.POST.get('replyingTo'), video=video)
+    return Response(commentToDto(comment))
+
+
+def commentToDto(comment: Comment):
+    return {
+        "id": comment.id,
+        "text": comment.text,
+        "postedDate": comment.postedDate,
+        "hasReplays": comment.hasReplays,
+        "author": {
+            "username": comment.author.username
+        }
+    }
 
 
 def videoToDto(video: Video):
