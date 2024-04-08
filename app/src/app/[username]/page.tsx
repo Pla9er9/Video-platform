@@ -1,10 +1,11 @@
 import Main from "@/components/Main";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import fetchHttp from "@/lib/fetchHttp";
 import { redirect } from "next/navigation";
 import "./page.scss";
 import UserSubpages from "@/components/UserSubpages";
+import SubscribeButton from "@/components/SubscribeButton";
+import { cookies } from 'next/headers'
 
 export default async function Page({
     params,
@@ -15,8 +16,11 @@ export default async function Page({
         redirect("/404");
     }
 
-    const res = await fetchHttp(`/user/${params.username.slice(3)}`, {});
-
+    const cookieStore = cookies()
+    const res = await fetchHttp(`/user/${params.username.slice(3)}`, {
+        token: cookieStore.get('jwtToken')?.value
+    });
+    
     return (
         <Main classname="max-w-[1100px] mx-auto px-[25px]">
             <div className="row w-full flex-wrap">
@@ -34,7 +38,7 @@ export default async function Page({
                         {res.body.subscriptions} subscriptions
                     </p>
                 </div>
-                <Button className="rounded-full ml-8">Subscribe</Button>
+                <SubscribeButton isSub={res.body.subscribing} username={res.body.username} />
             </div>
             <UserSubpages username={params.username.slice(3)} profileInformation={res.body} />
         </Main>
