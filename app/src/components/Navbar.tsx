@@ -22,7 +22,7 @@ export default function Navbar({ onClick }) {
                 <Link href={`/@${data.username}`} style={{margin: "0 8px"}}>
                     <Avatar style={{width: "35px", height: "35px"}}>
                         <AvatarImage
-                            src=""
+                            src={`${process.env.NEXT_PUBLIC_API_URL}/user/${data.username}/avatar`}
                             alt="@shadcn"
                         />
                         <AvatarFallback style={{fontSize: "12px"}}>{data.username?.slice(0, 2)}</AvatarFallback>

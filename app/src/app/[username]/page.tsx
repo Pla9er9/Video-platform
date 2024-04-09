@@ -25,7 +25,7 @@ export default async function Page({
         <Main classname="max-w-[1100px] mx-auto px-[25px]">
             <div className="row w-full flex-wrap">
                 <Avatar className="w-28 h-28">
-                    <AvatarImage src="" alt="@shadcn" />
+                    <AvatarImage src={`${process.env.NEXT_PUBLIC_API_URL}/user/${res.body.username}/avatar`} alt="@shadcn" />
                     <AvatarFallback style={{ fontSize: "32px" }}>
                         {res.body.username?.slice(0, 2)}
                     </AvatarFallback>

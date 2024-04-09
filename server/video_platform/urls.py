@@ -7,6 +7,7 @@ urlpatterns = [
     path('login', views.login),
     path('signup', views.signup),
     path('account/videos', video.getAccountVideos),
+    path('account/avatar', views.uploadAvatar),
     path('video/new', video.createVideo),
     path("video", video.getAllVideos),
     path("video/<uuid:id>", video.getVideoData),
@@ -18,6 +19,7 @@ urlpatterns = [
     path("video/<uuid:id>/comments/new", video.postComment),
     path("search", views.search),
     path("user/<str:username>", user.getUser),
+    path("user/<str:username>/avatar", user.getUserAvatar),
     path("user/<str:username>/subscribe", user.subscribeUser),
     path("user/<str:username>/unsubscribe", user.unsubscribeUser),
     path("user/<str:username>/videos", video.getUsersVideos)

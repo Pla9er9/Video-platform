@@ -9,7 +9,7 @@ export default function Comment(props: { data: any }) {
             <div className="row mt-12 w-full" style={{alignItems: "flex-start"}}>
                 <Link href={`/@${props.data.author.username}`}>
                     <Avatar style={{ width: "35px", height: "35px" }}>
-                        <AvatarImage src="" alt="@shadcn" />
+                        <AvatarImage src={`${process.env.NEXT_PUBLIC_API_URL}/user/${props.data.author.username}/avatar`} alt="@shadcn" />
                         <AvatarFallback style={{ fontSize: "12px" }}>
                             {props.data.author.username?.slice(0, 2)}
                         </AvatarFallback>

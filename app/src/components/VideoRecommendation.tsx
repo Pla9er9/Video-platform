@@ -28,7 +28,7 @@ export default function VideoRecommendation(props: {
                 ) : (
                     <Link href={`/@${props.data.creator.username}`}>
                         <Avatar className="avatar">
-                            <AvatarImage src="" alt="@shadcn" />
+                            <AvatarImage src={`${process.env.NEXT_PUBLIC_API_URL}/user/${props.data.creator.username}/avatar`} alt="@shadcn" />
                             <AvatarFallback style={{ fontSize: "12px" }}>
                                 {props.data.creator.username?.slice(0, 2)}
                             </AvatarFallback>

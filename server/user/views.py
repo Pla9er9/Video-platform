@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -59,3 +60,16 @@ def unsubscribeUser(request, username):
     user.save()
 
     return Response()
+
+
+@api_view(['GET'])
+def getUserAvatar(request, username):
+    user = get_object_or_404(UserProfile, username=username)
+    for format in ['jpg', 'png']:
+        try:
+            with open(f'media/avatars/{user.id}.{format}', 'rb') as f:
+                return HttpResponse(f.read(), content_type="image/png")
+        except:
+            continue
+
+    return Response(status=404)
