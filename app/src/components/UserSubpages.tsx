@@ -11,9 +11,10 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import VideoRecommendation from "./VideoRecommendation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Calendar, Group, Mail, Users } from "lucide-react";
 import "./UserSubpages.scss";
+import { original } from "@reduxjs/toolkit";
 
 type stepType = "videos" | "playlists" | "informations";
 
@@ -24,16 +25,33 @@ export default function UserSubpages(props: {
     const [data, setData] = useState<any>(null);
     const [isLoading, setLoading] = useState(true);
     const [step, setStep] = useState<stepType>("videos");
+    const [value, setValue] = useState('');
     const iconSize = 22;
+
+    const orginal = useRef()
 
     useEffect(() => {
         fetchHttp(`/user/${props.username}/videos`, {}).then((data) => {
             if (data.ok) {
                 setData(data.body);
+                orginal.current = data.body
             }
             setLoading(false);
         });
     }, []);
+
+    useEffect(() => {
+        if (value !== "") {
+            fetchHttp(`/search?query=${value}&user=${props.username}`, {}).then((data) => {
+                if (data.ok) {
+                    setData(data.body.videos);
+                }
+                setLoading(false);
+            });
+        } else {
+            setData(orginal.current)
+        }
+    }, [value]);
 
     if (isLoading) return <p>Loading...</p>;
     if (!data) return <p>No videos</p>;
@@ -59,6 +77,7 @@ export default function UserSubpages(props: {
                     <Input
                         className="w-[180px]"
                         placeholder="Search on channel"
+                        onChange={(e) => setValue(e.target.value)}
                     />
                 </div>
             </div>

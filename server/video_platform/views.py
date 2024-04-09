@@ -40,15 +40,23 @@ def signup(request):
 @api_view(['GET'])
 def search(request):
     query = request.GET.get('query')
+    user = request.GET.get('user')
+    videos = []
+    profiles = []
+    
     if (not query):
         return Response({'message': 'Url param `query` not provided'}, status=400)
 
-    profiles = [{
-        'id': u.id,
-        'username': u.username,
-        'subscriptions': len(u.subscriptions.all())
-    } for u in UserProfile.objects.filter(username__contains=query)[:3]]
-    videos = [videoToDto(v) for v in Video.objects.filter(title__contains=query)[:9]]
+    if not user:
+        profiles = [{
+            'id': u.id,
+            'username': u.username,
+            'subscriptions': len(u.subscriptions.all())
+        } for u in UserProfile.objects.filter(username__contains=query)[:3]]
+    if user:
+        videos = [videoToDto(v) for v in Video.objects.filter(title__contains=query, creator__username=user)[:9]]
+    else:
+        videos = [videoToDto(v) for v in Video.objects.filter(title__contains=query)[:9]]
 
     return Response({
         'profiles': profiles,
