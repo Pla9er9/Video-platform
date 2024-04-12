@@ -12,7 +12,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import Description from "@/components/Description";
-import Comments from "@/components/Comments"
+import Comments from "@/components/Comments";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
 
 async function getData(id: string) {
     const res = await fetchHttp(`/video/${id}`, {
@@ -28,16 +30,15 @@ async function getData(id: string) {
 
 export default async function Watch({
     searchParams,
-  }: {
+}: {
     searchParams?: { [key: string]: string | undefined };
-  }) {
-    const videoId = searchParams?.videoId
+}) {
+    const videoId = searchParams?.videoId;
     if (!videoId) {
         redirect("/404");
     }
-    const data = await getData(videoId)
-    const exampleVideoUrl =
-        `${process.env.NEXT_PUBLIC_API_URL}/video/${videoId}/v`
+    const data = await getData(videoId);
+    const exampleVideoUrl = `${process.env.NEXT_PUBLIC_API_URL}/video/${videoId}/v`;
 
     return (
         <Main classname="p-[0] items-start">
@@ -55,9 +56,25 @@ export default async function Watch({
                 />
                 <div className="row space-x-3 ml-[2px] my-2">
                     <p>{data.views} views</p>
-                    <p>{data.created}</p>
+                    <p>{data.created.slice(0, 10)}</p>
                 </div>
-                <div className="row space-x-3 mt-2">
+                <div className="row space-x-5 mt-2">
+                    <div className="row space-x-3">
+                        <Link href={`/@${data.creator.username}`}>
+                            <Avatar style={{ width: "40px", height: "40px" }}>
+                                <AvatarImage
+                                    src={`${process.env.NEXT_PUBLIC_API_URL}/user/${data.creator.username}/avatar`}
+                                    alt="@shadcn"
+                                />
+                                <AvatarFallback style={{ fontSize: "12px" }}>
+                                    {data.creator.username?.slice(0, 2)}
+                                </AvatarFallback>
+                            </Avatar>
+                        </Link>
+                        <Link href={`/@${data.creator.username}`}>
+                            {data.creator.username}
+                        </Link>
+                    </div>
                     <Button className="rounded-full" variant="outline">
                         <ArrowUp size="18px" className="mr-2" />
                         {data.likes} Like
