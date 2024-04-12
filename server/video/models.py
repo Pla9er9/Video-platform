@@ -31,3 +31,4 @@ class Playlist(models.Model):
     isPrivate = models.BooleanField(default=True)
     author = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     createdDate = models.DateTimeField(default=timezone.now)
+    videos = models.ManyToManyField(Video)
