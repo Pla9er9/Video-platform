@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from video_platform.serializers import CommentSerializer, VideoSerializer
 from django.shortcuts import get_object_or_404
-from .models import Video, Comment
+from .models import Playlist, Video, Comment
 from sage_stream.utils.stream_services import get_streaming_response
 
 allowedMiniatureFormats = ["png", "jpg"]
@@ -54,6 +54,9 @@ def getUsersVideos(request, username):
 def getVideoData(request, id):
     video = get_object_or_404(Video, id=id)
 
+    video.views += 1
+    video.save()
+
     return Response({
         "id": video.id,
         "title": video.title,
@@ -62,7 +65,10 @@ def getVideoData(request, id):
         "created": video.created,
         "views": video.views,
         "likes": video.likes,
-        "dislikes": video.dislikes
+        "dislikes": video.dislikes,
+        "creator": {
+            "username": video.creator.username
+        }
     })
 
 
@@ -186,6 +192,19 @@ def postComment(request, id):
         author=request.user, replyingTo=request.POST.get('replyingTo'), video=video)
     return Response(commentToDto(comment))
 
+def getPlaylist(request, id):
+    playlist = get_object_or_404(Playlist, id=id)
+    
+    return Response({
+        "id": playlist.id,
+        "name": playlist.name,
+        "isPrivate": playlist.isPrivate,
+        "author": {
+            "username": playlist.author.username
+        },
+        "createdDate": playlist.createdDate,
+        "videos": [videoToDto(v) for v in playlist.videos.all()]
+    })
 
 def commentToDto(comment: Comment):
     return {
@@ -197,7 +216,6 @@ def commentToDto(comment: Comment):
             "username": comment.author.username
         }
     }
-
 
 def videoToDto(video: Video):
     return {
