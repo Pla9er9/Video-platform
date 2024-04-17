@@ -11,8 +11,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from video_platform.serializers import CommentSerializer, VideoSerializer
 from django.shortcuts import get_object_or_404
-from .models import Playlist, Video, Comment
+from .models import Playlist, Reaction, Video, Comment
 from sage_stream.utils.stream_services import get_streaming_response
+from django.db.models import Q
 
 allowedMiniatureFormats = ["png", "jpg"]
 allowedVideoFormats = ["mp4"]
@@ -44,18 +45,32 @@ def getAccountVideos(request):
     videos = Video.objects.filter(creator__username=request.user.username)
     return Response([videoToDto(v) for v in videos])
 
+
 @api_view(['GET'])
 def getUsersVideos(request, username):
     videos = Video.objects.filter(isPrivate=False, creator__username=username)
     res = [videoToDto(v) for v in videos]
     return Response(res)
 
+
 @api_view(['GET'])
 def getVideoData(request, id):
     video = get_object_or_404(Video, id=id)
 
+    if video.isPrivate:
+        return Response(status=404)
+
     video.views += 1
     video.save()
+
+    reaction = Reaction.objects.filter(
+        reaction_video_id=id, account_id=request.user.id)
+    dislikes = Reaction.objects.filter(
+        reaction_video_id=id, variant="dislike").count()
+
+    variant = None
+    if reaction:
+        variant = reaction.variant
 
     return Response({
         "id": video.id,
@@ -64,8 +79,9 @@ def getVideoData(request, id):
         "isPrivate": video.isPrivate,
         "created": video.created,
         "views": video.views,
-        "likes": video.likes,
-        "dislikes": video.dislikes,
+        "likes": Reaction.objects.filter(reaction_video_id=id).count() - dislikes,
+        "dislikes": dislikes,
+        "reaction": variant,
         "creator": {
             "username": video.creator.username
         }
@@ -75,6 +91,46 @@ def getVideoData(request, id):
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
+def likeVideo(request, id):
+    video = get_object_or_404(Video, id=id)
+
+    Reaction.objects.filter(reaction_video_id=id,
+                            account_id=request.user.id).delete()
+    r = Reaction.objects.create(
+        account=request.user, variant="like", video=video)
+    video.reactions.add(r)
+    video.save()
+    return Response()
+
+
+@ api_view(['POST'])
+@ authentication_classes([SessionAuthentication, TokenAuthentication])
+@ permission_classes([IsAuthenticated])
+def dislikeVideo(request, id):
+    video = get_object_or_404(Video, id=id)
+    reaction = Reaction.objects.filter(
+        reaction_video_id=id, account_id=request.user.id)
+    reaction.delete()
+    r = Reaction.objects.create(
+        account=request.user, variant="dislike", video=video)
+    video.reactions.add(r)
+    video.save()
+    return Response()
+
+
+@ api_view(['POST'])
+@ authentication_classes([SessionAuthentication, TokenAuthentication])
+@ permission_classes([IsAuthenticated])
+def removeReaction(request, id):
+    video = get_object_or_404(Video, id=id)
+    video.reactions.remove(account_id=request.user.id)
+    video.save()
+    return Response()
+
+
+@ api_view(['POST'])
+@ authentication_classes([SessionAuthentication, TokenAuthentication])
+@ permission_classes([IsAuthenticated])
 def uploadVideo(request, id):
     video = get_object_or_404(Video, id=id)
 
@@ -98,9 +154,9 @@ def uploadVideo(request, id):
     return Response()
 
 
-@api_view(['POST'])
-@authentication_classes([SessionAuthentication, TokenAuthentication])
-@permission_classes([IsAuthenticated])
+@ api_view(['POST'])
+@ authentication_classes([SessionAuthentication, TokenAuthentication])
+@ permission_classes([IsAuthenticated])
 def uploadMiniature(request, id):
     video = get_object_or_404(Video, id=id)
 
@@ -124,7 +180,7 @@ def uploadMiniature(request, id):
     return Response()
 
 
-@api_view(['GET'])
+@ api_view(['GET'])
 def getMiniature(request, id):
     video = get_object_or_404(Video, id=id)
 
@@ -141,7 +197,7 @@ def getMiniature(request, id):
     return Response(status=404)
 
 
-@api_view(['GET'])
+@ api_view(['GET'])
 def getVideoStream(request, id):
     video = get_object_or_404(Video, id=id)
 
@@ -164,7 +220,7 @@ def getVideoStream(request, id):
     )
 
 
-@api_view(['GET'])
+@ api_view(['GET'])
 def getComments(request, id):
     comments = []
     replyingTo = request.GET.get('replyingTo')
@@ -176,9 +232,10 @@ def getComments(request, id):
 
     return Response([commentToDto(c) for c in comments])
 
-@api_view(['POST'])
-@authentication_classes([SessionAuthentication, TokenAuthentication])
-@permission_classes([IsAuthenticated])
+
+@ api_view(['POST'])
+@ authentication_classes([SessionAuthentication, TokenAuthentication])
+@ permission_classes([IsAuthenticated])
 def postComment(request, id):
     video = get_object_or_404(Video, id=id)
     if (video.isPrivate):
@@ -192,9 +249,14 @@ def postComment(request, id):
         author=request.user, replyingTo=request.POST.get('replyingTo'), video=video)
     return Response(commentToDto(comment))
 
+
+@api_view(['GET'])
 def getPlaylist(request, id):
     playlist = get_object_or_404(Playlist, id=id)
-    
+
+    if playlist.isPrivate:
+        return Response(status=404)
+
     return Response({
         "id": playlist.id,
         "name": playlist.name,
@@ -206,6 +268,55 @@ def getPlaylist(request, id):
         "videos": [videoToDto(v) for v in playlist.videos.all()]
     })
 
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def getAccountPlaylist(request):
+    playlists = Playlist.objects.filter(author__id=request.user.id)
+    return Response([playlistToDto(p) for p in playlists])
+
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def addToPlaylist(request, id):
+    videoId = request.GET["videoId"]
+    if videoId == None:
+        return Response({"message": "VideoId query param not provided"}, status=400)
+
+    playlist = get_object_or_404(Playlist, id=id)
+    video = get_object_or_404(Video, id=videoId)
+    if playlist.videos.contains(video):
+        return Response()
+
+    playlist.videos.add(video)
+    playlist.save()
+    return Response()
+
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def newPlaylist(request):
+    p = Playlist()
+    p.name = request.data["name"]
+    p.isPrivate = request.data["isPrivate"]
+    p.author = request.user
+    p.save()
+    return Response(playlistToDto(Playlist.objects.get(name=request.data["name"])))
+
+
+def playlistToDto(playlist: Playlist):
+    return {
+        "id": playlist.id,
+        "name": playlist.name,
+        "isPrivate": playlist.isPrivate,
+        "createdDate": playlist.createdDate,
+        "videos": playlist.videos.all().count()
+    }
+
+
 def commentToDto(comment: Comment):
     return {
         "id": comment.id,
@@ -216,6 +327,7 @@ def commentToDto(comment: Comment):
             "username": comment.author.username
         }
     }
+
 
 def videoToDto(video: Video):
     return {

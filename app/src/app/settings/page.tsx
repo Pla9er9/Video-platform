@@ -11,16 +11,18 @@ import { getCookie } from "@/lib/cookieOperations";
 import { RootState } from "@/lib/store";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useToast } from "@/components/ui/use-toast";
+import PlaylistRow from "@/components/PlaylistRow";
 
-async function saveAccountData() {
-    
-}
+async function saveAccountData() {}
 
 export default function Settings() {
     const token = useSelector((state: RootState) => state.token.value);
     const [videos, setVideos] = useState<any[] | null>(null);
+    const [playlists, setPlaylists] = useState<any[] | null>(null);
     const [account, setAccount] = useState<any | null>(null);
     const [step, setStep] = useState("account");
+    const { toast } = useToast();
 
     async function loadAccountData() {
         if (account) return;
@@ -39,14 +41,34 @@ export default function Settings() {
         });
         if (res.ok) {
             setVideos(res.body);
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Could not load video",
+            });
+        }
+    }
+
+    async function loadPlaylists() {
+        if (playlists) return;
+        const res = await fetchHttp(`/account/playlists`, {
+            token: token,
+        });
+        if (res.ok) {
+            setPlaylists(res.body);
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Could not load playlists",
+            });
         }
     }
 
     useEffect(() => {
-        loadAccountData()
-    }, [])
+        loadAccountData();
+    }, []);
 
-    loadAccountData()
+    loadAccountData();
 
     return (
         <Main classname="p-4">
@@ -61,7 +83,9 @@ export default function Settings() {
                         <TabsTrigger value="videos" onClick={loadVideos}>
                             Videos
                         </TabsTrigger>
-                        <TabsTrigger value="playlists">Playlists</TabsTrigger>
+                        <TabsTrigger value="playlists" onClick={loadPlaylists}>
+                            Playlists
+                        </TabsTrigger>
                     </TabsList>
                 </Tabs>
             </div>
@@ -76,13 +100,28 @@ export default function Settings() {
                     <></>
                 )}
                 {step === "account" && account ? (
-                    <div className="column space-y-4 w-[100%] max-w-[500px]" style={{alignItems: 'flex-start'}}>
+                    <div
+                        className="column space-y-4 w-[100%] max-w-[500px]"
+                        style={{ alignItems: "flex-start" }}
+                    >
                         <p className="text-2xl text-white my-4">Account data</p>
-                        <Input value={account.username}/>
-                        <Input value={account.email}/>
-                        <Input value={account.firstname}/>
-                        <Textarea value={account.description} style={{resize: 'none', height: '120px'}}/>
+                        <Input value={account.username} />
+                        <Input value={account.email} />
+                        <Input value={account.firstname} />
+                        <Textarea
+                            value={account.description}
+                            style={{ resize: "none", height: "120px" }}
+                        />
                         <Button>Save</Button>
+                    </div>
+                ) : (
+                    <></>
+                )}
+                {step === "playlists" && playlists ? (
+                    <div className="column w-full">
+                        {playlists.map((p) => (
+                            <PlaylistRow playlist={p} key={p.id} />
+                        ))}
                     </div>
                 ) : (
                     <></>

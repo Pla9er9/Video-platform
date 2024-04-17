@@ -10,11 +10,13 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, List } from "lucide-react";
 import Description from "@/components/Description";
 import Comments from "@/components/Comments";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
+import { AddToPlaylist } from "@/components/AddToPlaylist";
+import ReactionButtons from "@/components/ReactionButtons";
 
 async function getData(id: string) {
     const res = await fetchHttp(`/video/${id}`, {
@@ -39,6 +41,7 @@ export default async function Watch({
     }
     const data = await getData(videoId);
     const exampleVideoUrl = `${process.env.NEXT_PUBLIC_API_URL}/video/${videoId}/v`;
+    console.log(data)
 
     return (
         <Main classname="p-[0] items-start">
@@ -58,13 +61,13 @@ export default async function Watch({
                     <p>{data.views} views</p>
                     <p>{data.created.slice(0, 10)}</p>
                 </div>
-                <div className="row space-x-5 mt-2">
+                <div className="row space-x-5 mt-2 flex-wrap">
                     <div className="row space-x-3">
                         <Link href={`/@${data.creator.username}`}>
                             <Avatar style={{ width: "40px", height: "40px" }}>
                                 <AvatarImage
                                     src={`${process.env.NEXT_PUBLIC_API_URL}/user/${data.creator.username}/avatar`}
-                                    alt="@shadcn"
+                                    alt="avatar"
                                 />
                                 <AvatarFallback style={{ fontSize: "12px" }}>
                                     {data.creator.username?.slice(0, 2)}
@@ -74,15 +77,10 @@ export default async function Watch({
                         <Link href={`/@${data.creator.username}`}>
                             {data.creator.username}
                         </Link>
+                        <div></div>
                     </div>
-                    <Button className="rounded-full" variant="outline">
-                        <ArrowUp size="18px" className="mr-2" />
-                        {data.likes} Like
-                    </Button>
-                    <Button className="rounded-full" variant="secondary">
-                        <ArrowDown size="18px" className="mr-2" />
-                        {data.dislikes} Dislike
-                    </Button>
+                    <ReactionButtons likes={data.likes} dislikes={data.dislikes} reaction={data.reaction} />
+                    <AddToPlaylist />
                 </div>
                 <Accordion
                     type="single"

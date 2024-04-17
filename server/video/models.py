@@ -3,6 +3,7 @@ from django.db import models
 from user.models import UserProfile
 from django.utils import timezone
 
+
 class Video(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     title = models.CharField(max_length=45, blank=False)
@@ -13,8 +14,13 @@ class Video(models.Model):
     videoUploaded = models.BooleanField(default=False)
     miniatureUploaded = models.BooleanField(default=False)
     views = models.IntegerField(default=0)
-    likes = models.IntegerField(default=0)
-    dislikes = models.IntegerField(default=0)
+    reactions = models.ManyToManyField('Reaction')
+
+class Reaction(models.Model):
+    id = models.IntegerField(primary_key=True, default=uuid.uuid4)
+    account = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    variant = models.CharField()
+    video = models.ForeignKey(Video, on_delete=models.CASCADE, name="reaction_video", default=None)
 
 class Comment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
