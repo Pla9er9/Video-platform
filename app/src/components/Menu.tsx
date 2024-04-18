@@ -10,6 +10,7 @@ export default function Menu() {
             <a href="/">Home</a>
             {token ? <>
                 <a href="/upload">Upload video</a>
+                <a href="/settings">Settings</a>
             </> : <>
                 <a href="/login">Login</a>
                 <a href="/registration">Sign up</a>
