@@ -307,6 +307,13 @@ def newPlaylist(request):
     p.save()
     return Response(playlistToDto(Playlist.objects.get(name=request.data["name"])))
 
+@api_view(['DELETE'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def deletePlaylist(request, id):
+    playlist = get_object_or_404(Playlist, id=id)
+    playlist.delete()
+    return Response()
 
 def playlistToDto(playlist: Playlist):
     return {
