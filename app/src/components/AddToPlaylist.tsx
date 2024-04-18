@@ -75,7 +75,6 @@ export function AddToPlaylist() {
     async function loadPlaylists() {
         if (playlists.length > 0) return
 
-        alert("PLalist fetch")
         const res = await fetchHttp(`/account/playlists`, {
             token: token,
         });
