@@ -12,7 +12,7 @@ import {
 import { List } from "lucide-react";
 import { Input } from "./ui/input";
 import { Checkbox } from "./ui/checkbox";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useToast } from "./ui/use-toast";
 import fetchHttp from "@/lib/fetchHttp";
 import { useSelector } from "react-redux";
@@ -72,26 +72,27 @@ export function AddToPlaylist() {
         }
     }
 
-    useEffect(() => {
-            const res = fetchHttp(`/account/playlists`, {
-                token: token,
-            });
-            res.then((r) => {
-                if (r.ok) {
-                    setPlaylist(r.body);
-                }
-            });
-    }, []);
+    async function loadPlaylists() {
+        if (playlists.length > 0) return
+
+        alert("PLalist fetch")
+        const res = await fetchHttp(`/account/playlists`, {
+            token: token,
+        });
+        if (res.ok) {
+            setPlaylist(res.body)
+        }
+    }
 
     return (
-        <Dialog>
+        <Dialog onOpenChange={loadPlaylists}>
             <DialogTrigger asChild>
                 <Button className="rounded-full" variant="outline">
                     <List size="18px" className="mr-2" />
                     Add to Playlist
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px]" >
                 <DialogHeader>
                     <DialogTitle>Save video in playlist</DialogTitle>
                     <DialogDescription>
@@ -121,7 +122,7 @@ export function AddToPlaylist() {
                         value={value}
                     />
                     <div className="row w-full">
-                        <Checkbox id="terms" className="w-5 h-5 ml-2" value={isPrivate ? 1 : 0} onCheckedChange={() => setPrivate(!isPrivate)}  />
+                        <Checkbox id="terms" className="w-5 h-5 ml-2" value={isPrivate ? 1 : 0} onCheckedChange={() => setPrivate(!isPrivate)} />
                         <label
                             htmlFor="terms"
                             className="ml-3 text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
