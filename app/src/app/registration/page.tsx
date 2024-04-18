@@ -73,7 +73,7 @@ export default function Registration() {
             body: JSON.stringify({
                 username: values.username,
                 password: values.password,
-                firstname: values.firstname,
+                first_name: values.firstname,
                 email: values.email,
             }),
             headers: {
