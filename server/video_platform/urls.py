@@ -14,7 +14,7 @@ urlpatterns = [
     path("video/<uuid:id>", video.getVideoData),
     path("video/<uuid:id>/like", video.likeVideo),
     path("video/<uuid:id>/dislike", video.dislikeVideo),
-    path("video/<uuid:id>/unline", video.removeReaction),
+    path("video/<uuid:id>/unlike", video.removeReaction),
     path("video/<uuid:id>/upload/video", video.uploadVideo),
     path("video/<uuid:id>/upload/miniature", video.uploadMiniature),
     path("video/<uuid:id>/miniature", video.getMiniature),

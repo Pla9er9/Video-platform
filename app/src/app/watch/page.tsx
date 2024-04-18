@@ -9,18 +9,18 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { ArrowDown, ArrowUp, List } from "lucide-react";
 import Description from "@/components/Description";
 import Comments from "@/components/Comments";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { AddToPlaylist } from "@/components/AddToPlaylist";
 import ReactionButtons from "@/components/ReactionButtons";
+import { cookies } from "next/headers";
 
 async function getData(id: string) {
     const res = await fetchHttp(`/video/${id}`, {
         server: true,
+        token: cookies().get('jwtToken')?.value
     });
 
     if (!res.ok) {
@@ -41,7 +41,6 @@ export default async function Watch({
     }
     const data = await getData(videoId);
     const exampleVideoUrl = `${process.env.NEXT_PUBLIC_API_URL}/video/${videoId}/v`;
-    console.log(data)
 
     return (
         <Main classname="p-[0] items-start">

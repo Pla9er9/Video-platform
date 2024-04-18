@@ -14,6 +14,17 @@ export default function ReactionButtons(props: {
     dislikes: number;
     reaction: reaction;
 }) {
+    let likes = props.likes
+    let dislikes = props.dislikes
+
+    if (props.reaction === "like") {
+        likes -= 1
+    }
+
+    if (props.reaction === "dislike") {
+        dislikes -= 1
+    }
+
     const [reaction, setReaction] = useState<reaction>(props.reaction);
     const token = useSelector((state: RootState) => state.token.value);
     let videoId = useRef("")
@@ -24,7 +35,15 @@ export default function ReactionButtons(props: {
     }, [])
 
     async function resetReaction() {
-        setReaction(null);
+        const res = await fetchHttp(`/video/${videoId.current}/unlike`, {
+            method: "POST",
+            token: token
+        })
+        if (res.ok) {
+            setReaction(null);
+        } else {
+            console.error(res)
+        }
     }
 
     async function changeReaction(_reaction: reaction) {
@@ -39,7 +58,7 @@ export default function ReactionButtons(props: {
         if (res.ok) {
             setReaction(_reaction);
         } else {
-            console.log(res)
+            console.error(res)
         }
     }
 
@@ -51,7 +70,7 @@ export default function ReactionButtons(props: {
                 onClick={() => changeReaction("like")}
             >
                 <ArrowUp size="18px" className="mr-2" />
-                {props.likes + (reaction === "like" ? 1 : 0)}
+                {likes + (reaction === "like" ? 1 : 0)}
             </Button>
             <Button
                 className="rounded-full"
@@ -59,7 +78,7 @@ export default function ReactionButtons(props: {
                 onClick={() => changeReaction("dislike")}
             >
                 <ArrowDown size="18px" className="mr-2" />
-                {props.dislikes + (reaction === "dislike" ? 1 : 0)}
+                {dislikes + (reaction === "dislike" ? 1 : 0)}
             </Button>
         </>
     );

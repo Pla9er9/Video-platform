@@ -17,7 +17,7 @@ class Video(models.Model):
     reactions = models.ManyToManyField('Reaction')
 
 class Reaction(models.Model):
-    id = models.IntegerField(primary_key=True, default=uuid.uuid4)
+    id = models.BigAutoField(primary_key=True, unique=True)
     account = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     variant = models.CharField()
     video = models.ForeignKey(Video, on_delete=models.CASCADE, name="reaction_video", default=None)

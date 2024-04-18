@@ -54,6 +54,7 @@ def getUsersVideos(request, username):
 
 
 @api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
 def getVideoData(request, id):
     video = get_object_or_404(Video, id=id)
 
@@ -70,7 +71,7 @@ def getVideoData(request, id):
 
     variant = None
     if reaction:
-        variant = reaction.variant
+        variant = reaction.first().variant
 
     return Response({
         "id": video.id,
@@ -93,13 +94,13 @@ def getVideoData(request, id):
 @permission_classes([IsAuthenticated])
 def likeVideo(request, id):
     video = get_object_or_404(Video, id=id)
-
+    if video.isPrivate:
+        return Response(status=404)
+    
     Reaction.objects.filter(reaction_video_id=id,
                             account_id=request.user.id).delete()
     r = Reaction.objects.create(
-        account=request.user, variant="like", video=video)
-    video.reactions.add(r)
-    video.save()
+        account=request.user, variant="like", reaction_video=video)
     return Response()
 
 
@@ -108,13 +109,13 @@ def likeVideo(request, id):
 @ permission_classes([IsAuthenticated])
 def dislikeVideo(request, id):
     video = get_object_or_404(Video, id=id)
-    reaction = Reaction.objects.filter(
-        reaction_video_id=id, account_id=request.user.id)
-    reaction.delete()
+    if video.isPrivate:
+        return Response(status=404)
+
+    Reaction.objects.filter(
+        reaction_video_id=id, account_id=request.user.id).delete()
     r = Reaction.objects.create(
-        account=request.user, variant="dislike", video=video)
-    video.reactions.add(r)
-    video.save()
+        account=request.user, variant="dislike", reaction_video=video)
     return Response()
 
 
@@ -123,8 +124,8 @@ def dislikeVideo(request, id):
 @ permission_classes([IsAuthenticated])
 def removeReaction(request, id):
     video = get_object_or_404(Video, id=id)
-    video.reactions.remove(account_id=request.user.id)
-    video.save()
+    Reaction.objects.filter(
+        reaction_video_id=id, account_id=request.user.id).delete()
     return Response()
 
 
