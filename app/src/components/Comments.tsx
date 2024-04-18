@@ -12,7 +12,7 @@ import Comment from "./Comment";
 export default function Comments(props: { videoId: string }) {
     const token = useSelector((state: RootState) => state.token.value);
     
-    async function newComment(replyingTo?: string) {
+    async function newComment() {
         const res = await fetchHttp(`/video/${props.videoId}/comments/new`, {
             method: "POST",
             token: token,
@@ -48,10 +48,10 @@ export default function Comments(props: { videoId: string }) {
     if (data) {
         return (
             <>
-                <div className="row my-2">
+                {token ? <div className="row my-2">
                     <Input onChange={(a) => setValue(a.target.value)} placeholder="Write comment" />
                     <Button onClick={() => newComment()} className="rounded-full ml-6">Comment</Button>
-                </div>
+                </div> : <></>}
                 {data.map((e: any) => (
                     <Comment data={e} key={e.id}/>
                 ))}

@@ -5,8 +5,8 @@ import { Reply } from "lucide-react";
 
 export default function Comment(props: { data: any }) {
     return (
-        <div className="column" style={{ alignItems: "flex-start" }}>
-            <div className="row mt-12 w-full" style={{alignItems: "flex-start"}}>
+        <div className="column my-6" style={{ alignItems: "flex-start" }}>
+            <div className="row w-full" style={{alignItems: "flex-start"}}>
                 <Link href={`/@${props.data.author.username}`}>
                     <Avatar style={{ width: "35px", height: "35px" }}>
                         <AvatarImage src={`${process.env.NEXT_PUBLIC_API_URL}/user/${props.data.author.username}/avatar`} alt="@shadcn" />
