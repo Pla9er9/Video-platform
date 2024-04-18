@@ -47,6 +47,8 @@ export default function ReactionButtons(props: {
     }
 
     async function changeReaction(_reaction: reaction) {
+        if (!token) return
+
         if (reaction === _reaction) {
             resetReaction();
             return

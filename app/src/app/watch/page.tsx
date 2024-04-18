@@ -17,24 +17,25 @@ import { AddToPlaylist } from "@/components/AddToPlaylist";
 import ReactionButtons from "@/components/ReactionButtons";
 import { cookies } from "next/headers";
 
-async function getData(id: string) {
-    const res = await fetchHttp(`/video/${id}`, {
-        server: true,
-        token: cookies().get('jwtToken')?.value
-    });
-
-    if (!res.ok) {
-        redirect("/404");
-    }
-
-    return res.body;
-}
-
 export default async function Watch({
     searchParams,
 }: {
     searchParams?: { [key: string]: string | undefined };
 }) {
+    const token = cookies().get("jwtToken")?.value;
+
+    async function getData(id: string) {
+        const res = await fetchHttp(`/video/${id}`, {
+            server: true,
+            token: token,
+        });
+
+        if (!res.ok) {
+            redirect("/404");
+        }
+
+        return res.body;
+    }
     const videoId = searchParams?.videoId;
     if (!videoId) {
         redirect("/404");
@@ -78,8 +79,12 @@ export default async function Watch({
                         </Link>
                         <div></div>
                     </div>
-                    <ReactionButtons likes={data.likes} dislikes={data.dislikes} reaction={data.reaction} />
-                    <AddToPlaylist />
+                    <ReactionButtons
+                        likes={data.likes}
+                        dislikes={data.dislikes}
+                        reaction={data.reaction}
+                    />
+                    {token ? <AddToPlaylist /> : <></>}
                 </div>
                 <Accordion
                     type="single"
