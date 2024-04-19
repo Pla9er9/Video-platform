@@ -43,7 +43,7 @@ def createVideo(request):
 @permission_classes([IsAuthenticated])
 def getAccountVideos(request):
     videos = Video.objects.filter(creator__username=request.user.username)
-    return Response([videoToDto(v) for v in videos])
+    return Response([{**videoToDto(v), **{"description": v.description}} for v in videos])
 
 
 @api_view(['GET'])
@@ -220,6 +220,15 @@ def getVideoStream(request, id):
         max_load_volume=max_load_volume,
     )
 
+@ api_view(['DELETE'])
+@ authentication_classes([SessionAuthentication, TokenAuthentication])
+@ permission_classes([IsAuthenticated])
+def deleteVideo(request, id):
+    v = get_object_or_404(Video, id=id)
+    if v.creator.id != request.user.id:
+        return Response(status=403)
+    v.delete()
+    return Response()
 
 @ api_view(['GET'])
 def getComments(request, id):
