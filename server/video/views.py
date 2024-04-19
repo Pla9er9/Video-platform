@@ -220,6 +220,25 @@ def getVideoStream(request, id):
         max_load_volume=max_load_volume,
     )
 
+@ api_view(['PATCH'])
+@ authentication_classes([SessionAuthentication, TokenAuthentication])
+@ permission_classes([IsAuthenticated])
+def editVideoData(request, id):
+    v = get_object_or_404(Video, id=id)
+
+    title = request.data.get("title")
+    description = request.data.get("description")
+    isPrivate = request.data.get("isPrivate")
+
+    if (not title or not description or not isPrivate or title == ""):
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    v.title = title
+    v.description = description
+    v.isPrivate = isPrivate
+    v.save()
+    return Response({"id": videoToDto(v)})
+
 @ api_view(['DELETE'])
 @ authentication_classes([SessionAuthentication, TokenAuthentication])
 @ permission_classes([IsAuthenticated])
