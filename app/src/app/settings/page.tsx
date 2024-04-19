@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useToast } from "@/components/ui/use-toast";
 import PlaylistRow from "@/components/PlaylistRow";
+import VideoRowWithControls from "@/components/VideoRowWithControls";
 
 async function saveAccountData() {}
 
@@ -93,7 +94,7 @@ export default function Settings() {
                 {step === "videos" && videos ? (
                     videos.map((v) => {
                         return (
-                            <VideoRecommendation data={v} key={"v" + v.id} />
+                            <VideoRowWithControls video={v} key={v.id} />
                         );
                     })
                 ) : (
