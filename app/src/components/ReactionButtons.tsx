@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import fetchHttp from "@/lib/fetchHttp";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/store";
+import { useSearchParams } from "next/navigation";
 
 type reaction = "like" | "dislike" | null;
 
@@ -27,15 +28,11 @@ export default function ReactionButtons(props: {
 
     const [reaction, setReaction] = useState<reaction>(props.reaction);
     const token = useSelector((state: RootState) => state.token.value);
-    let videoId = useRef("")
-
-    useEffect(() => {
-        const s = new URLSearchParams(location.search)
-        videoId.current = s.get("videoId") ?? ""
-    }, [])
+    const searchParams = useSearchParams()
+    const videoId = searchParams.get("videoId")
 
     async function resetReaction() {
-        const res = await fetchHttp(`/video/${videoId.current}/unlike`, {
+        const res = await fetchHttp(`/video/${videoId}/unlike`, {
             method: "POST",
             token: token
         })
@@ -53,7 +50,7 @@ export default function ReactionButtons(props: {
             resetReaction();
             return
         }
-        const res = await fetchHttp(`/video/${videoId.current}/${_reaction}`, {
+        const res = await fetchHttp(`/video/${videoId}/${_reaction}`, {
             method: "POST",
             token: token
         })
