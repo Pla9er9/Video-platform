@@ -353,6 +353,26 @@ def newPlaylist(request):
     p.save()
     return Response(playlistToDto(Playlist.objects.get(name=request.data["name"])))
 
+@api_view(['PATCH'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def editPlaylist(request, id):
+    playlist = get_object_or_404(Playlist, id=id)
+
+    if playlist.author.id != request.user.id:
+        return Response(status=403)
+
+    name = request.data["name"]
+    isPrivate = request.data["isPrivate"]
+
+    if (not name or isPrivate == None) or (name and name == ""):
+        return Response(status=400)
+
+    playlist.name = name
+    playlist.isPrivate = isPrivate
+    playlist.save()
+
+    return Response()
 
 @api_view(['DELETE'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])

@@ -36,5 +36,6 @@ urlpatterns = [
     path("playlist/<uuid:id>", video.getPlaylist),
     path("playlist/<uuid:id>/add", video.addToPlaylist),
     path("playlist/<uuid:id>/video/<uuid:videoId>", video.removeVideoFromPlaylist),
+    path("playlist/<uuid:id>/edit", video.editPlaylist),
     path("playlist/<uuid:id>/delete", video.deletePlaylist),
 ]
