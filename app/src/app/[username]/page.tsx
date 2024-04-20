@@ -21,6 +21,10 @@ export default async function Page({
         token: cookieStore.get('jwtToken')?.value
     });
     
+    if (!res.ok) {
+        redirect("/404")
+    }
+
     return (
         <Main classname="max-w-[1100px] mx-auto px-[25px]">
             <div className="row w-full flex-wrap">
