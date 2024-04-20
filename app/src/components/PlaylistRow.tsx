@@ -7,6 +7,7 @@ import fetchHttp from "@/lib/fetchHttp";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/store";
 import { useToast } from "./ui/use-toast";
+import './VideoRow.scss'
 
 export default function PlaylistRow(props: { playlist: any }) {
     const token = useSelector((state: RootState) => state.token.value);
@@ -32,13 +33,15 @@ export default function PlaylistRow(props: { playlist: any }) {
     }
 
     return (
-        <div className="row w-full my-2" id={`playlist-${props.playlist.id}`}>
+        <div className="row w-full my-2 flex-wrap videoInfo" id={`playlist-${props.playlist.id}`}>
             {props.playlist.isPrivate ? <Lock size={16} /> : <Eye size={16} />}
             <Link href={`/playlist/${props.playlist.id}`} className="mx-3 w-[140px] overflow-x-hidden">
                 <h1>{props.playlist.name}</h1>
             </Link>
-            <p className="mx-auto">{props.playlist.videos} videos</p>
-            <p className="mx-auto">{props.playlist.createdDate.slice(0, 10)}</p>
+            <div className="column mx-auto w-[100px] overflow-hidden">
+                <p>{props.playlist.videos} videos</p>
+                <p>{props.playlist.createdDate.slice(0, 10)}</p>
+            </div>
             <Button size="icon" variant="ghost" className="w-8 h-8" onClick={deletePlaylist}>
                 <Trash color="red" className="w-4 h-4" />
             </Button>
