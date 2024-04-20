@@ -11,6 +11,7 @@ urlpatterns = [
     path('account/playlists', video.getAccountPlaylist),
     path('account/avatar', views.uploadAvatar),
     path('account/avatar/delete', views.deleteAvatar),
+    path('account/edit', views.editAccount),
     path('video/new', video.createVideo),
     path("video", video.getAllVideos),
     path("video/<uuid:id>", video.getVideoData),
