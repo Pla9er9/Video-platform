@@ -273,7 +273,7 @@ def postComment(request, id):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     comment = serializer.save(
-        author=request.user, replyingTo=request.POST.get('replyingTo'), video=video)
+        author=request.user, video=video)
     return Response(commentToDto(comment))
 
 @ api_view(['DELETE'])
