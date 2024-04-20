@@ -11,6 +11,10 @@ import Comment from "./Comment";
 
 export default function Comments(props: { videoId: string }) {
     const token = useSelector((state: RootState) => state.token.value);
+    const [data, setData] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [value, setValue] = useState("");
+    const { toast } = useToast();
     
     async function newComment() {
         const res = await fetchHttp(`/video/${props.videoId}/comments/new`, {
@@ -32,16 +36,11 @@ export default function Comments(props: { videoId: string }) {
         setValue("")
     }
 
-    const [data, setData] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [value, setValue] = useState("");
-    const { toast } = useToast();
-
     useEffect(() => {
         const res = fetchHttp(`/video/${props.videoId}/comments`, {});
         res.then((a) => (a.ok ? setData(a.body) : undefined));
         setLoading(false);
-    }, []);
+    }, [props.videoId]);
 
     if (loading) return <p>Loading...</p>;
 
