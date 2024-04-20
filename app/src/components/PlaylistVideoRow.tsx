@@ -9,10 +9,12 @@ import fetchHttp from "@/lib/fetchHttp";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/store";
 import { useToast } from "./ui/use-toast";
+import { useEffect, useState } from "react";
 
 export default function PlaylistVideoRow(props: { video: any; playlist: any }) {
     const token = useSelector((t: RootState) => t.token.value);
     const { toast } = useToast();
+    const [isAuthor, setIsAuthor] = useState(false)
 
     async function removeVideoFromPlaylist() {
         const res = await fetchHttp(
@@ -35,6 +37,10 @@ export default function PlaylistVideoRow(props: { video: any; playlist: any }) {
         }
     }
 
+    useEffect(() => {
+        setIsAuthor(props.playlist.author.username === getCookie("username"))
+    }, [])
+
     return (
         <div
             className="row w-full my-4"
@@ -56,7 +62,7 @@ export default function PlaylistVideoRow(props: { video: any; playlist: any }) {
                 <p>{props.video.creator.username}</p>
                 <p>{props.video.views} views</p>
             </div>
-            {props.playlist.author.username === getCookie("username") ? (
+            {isAuthor ? (
                 <Button size="icon" variant="ghost" className="ml-auto mr-4" onClick={removeVideoFromPlaylist}>
                     <Trash size={18} />
                 </Button>
