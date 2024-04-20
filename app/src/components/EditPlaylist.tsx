@@ -1,6 +1,5 @@
 "use client";
 
-import { getCookie } from "@/lib/cookieOperations";
 import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
@@ -14,13 +13,9 @@ export default function EditPlaylist(props: { playlist: any }) {
     const [editing, setEditing] = useState(false);
     const [value, setValue] = useState(props.playlist.name);
     const [isPrivate, setPrivate] = useState(props.playlist.isPrivate);
-    const [isAuthor, setIsAuthor] = useState(false);
+    const store = useSelector((v: RootState) => v.token)
+    const isAuthor = props.playlist.author.username === store.username
     const { toast } = useToast();
-    const token = useSelector((v: RootState) => v.token.value);
-
-    useEffect(() => {
-        setIsAuthor(props.playlist.author.username === getCookie("username"));
-    }, [props.playlist.author.username]);
 
     if (!isAuthor) return <></>;
 
@@ -39,7 +34,7 @@ export default function EditPlaylist(props: { playlist: any }) {
                 name: value,
                 isPrivate: isPrivate
             },
-            token: token
+            token: store.value
         })
         if (!res.ok) {
             toast({

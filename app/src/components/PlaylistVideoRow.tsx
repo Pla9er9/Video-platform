@@ -4,24 +4,22 @@ import Link from "next/link";
 import "./VideoRow.scss";
 import { Button } from "./ui/button";
 import { Trash } from "lucide-react";
-import { getCookie } from "@/lib/cookieOperations";
 import fetchHttp from "@/lib/fetchHttp";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/store";
 import { useToast } from "./ui/use-toast";
-import { useEffect, useState } from "react";
 
 export default function PlaylistVideoRow(props: { video: any; playlist: any }) {
-    const token = useSelector((t: RootState) => t.token.value);
     const { toast } = useToast();
-    const [isAuthor, setIsAuthor] = useState(false)
+    const store = useSelector((s: RootState) => s.token)
+    const isAuthor = props.playlist.author.username === store.username
 
     async function removeVideoFromPlaylist() {
         const res = await fetchHttp(
             `/playlist/${props.playlist.id}/video/${props.video.id}`,
             {
                 method: "DELETE",
-                token: token,
+                token: store.value,
             }
         );
 
@@ -36,10 +34,6 @@ export default function PlaylistVideoRow(props: { video: any; playlist: any }) {
                 ?.remove();
         }
     }
-
-    useEffect(() => {
-        setIsAuthor(props.playlist.author.username === getCookie("username"))
-    }, [])
 
     return (
         <div

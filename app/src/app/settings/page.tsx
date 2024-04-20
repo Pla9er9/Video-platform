@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import fetchHttp from "@/lib/fetchHttp";
-import { getCookie } from "@/lib/cookieOperations";
 import { RootState } from "@/lib/store";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -28,7 +27,7 @@ import Image from "next/image";
 import { Label } from "@/components/ui/label";
 
 export default function Settings() {
-    const token = useSelector((state: RootState) => state.token.value);
+    const store = useSelector((state: RootState) => state.token);
     const [videos, setVideos] = useState<any[] | null>(null);
     const [playlists, setPlaylists] = useState<any[] | null>(null);
     const [account, setAccount] = useState<any | null>(null);
@@ -98,7 +97,7 @@ export default function Settings() {
         formData.append("file", avatar);
         res = await fetchHttp(`/account/avatar`, {
             method: "POST",
-            token: token,
+            token: store.value,
             body: formData,
             stringify: false,
             noContentType: true,
@@ -117,8 +116,8 @@ export default function Settings() {
 
     async function loadAccountData() {
         if (account) return;
-        const res = await fetchHttp(`/user/${getCookie("username")}`, {
-            token: token,
+        const res = await fetchHttp(`/user/${store.username}`, {
+            token: store.value,
         });
         if (res.ok) {
             setAccount(res.body);
@@ -128,7 +127,7 @@ export default function Settings() {
     async function loadVideos() {
         if (videos) return;
         const res = await fetchHttp(`/account/videos`, {
-            token: token,
+            token: store.value,
         });
         if (res.ok) {
             setVideos(res.body);
@@ -143,7 +142,7 @@ export default function Settings() {
     async function loadPlaylists() {
         if (playlists) return;
         const res = await fetchHttp(`/account/playlists`, {
-            token: token,
+            token: store.value,
         });
         if (res.ok) {
             setPlaylists(res.body);
@@ -158,7 +157,7 @@ export default function Settings() {
     async function deleteAvatar() {
         const res = await fetchHttp("account/avatar/delete", {
             method: "DELETE",
-            token: token,
+            token: store.value,
         });
 
         if (!res.ok) {
