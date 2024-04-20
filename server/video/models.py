@@ -27,8 +27,6 @@ class Comment(models.Model):
     text = models.CharField(blank=False)
     postedDate = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    replyingTo = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
-    hasReplays = models.BooleanField(default=False)
     video = models.ForeignKey(Video, on_delete=models.CASCADE, default=None)
 
 class Playlist(models.Model):
