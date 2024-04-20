@@ -1,16 +1,21 @@
 import Main from "@/components/Main";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import VideoRow from "@/components/VideoRow";
+import PlaylistVideoRow from "@/components/PlaylistVideoRow";
 import fetchHttp from "@/lib/fetchHttp";
 import { Eye } from "lucide-react";
 import { Lock } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default async function Playlist({ params }: { params: { id: string } }) {
     const res = await fetchHttp(`/playlist/${params.id}`, {
         token: cookies().get("jwtToken"),
     });
+
+    if (!res.ok) {
+        redirect("/404")
+    }
 
     const playlist = res.body;
 
@@ -40,7 +45,7 @@ export default async function Playlist({ params }: { params: { id: string } }) {
                 {playlist.author.username}
             </Link>
             {playlist.videos.map((v: any) => {
-                return <VideoRow video={v} playlist={playlist} key={v.id} />;
+                return <PlaylistVideoRow video={v} playlist={playlist} key={v.id} />;
             })}
         </Main>
     );
