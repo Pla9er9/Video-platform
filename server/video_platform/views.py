@@ -11,6 +11,7 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer
 from django.contrib.auth import logout as django_logout
+import os
 
 @api_view(['POST'])
 def login(request):
@@ -87,5 +88,16 @@ def uploadAvatar(request):
     with open(f'media/avatars/{request.user.id}.{fileFormat}', 'wb+') as destination:
         for chunk in request.FILES['file'].chunks():
             destination.write(chunk)
+
+    return Response()
+
+@api_view(['DELETE'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def deleteAvatar(request):
+    for fileFormat in ["jpg", "png"]:
+        path = f'media/avatars/{request.user.id}.{fileFormat}'
+        if os.path.exists(path):
+            os.remove(path) 
 
     return Response()
