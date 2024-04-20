@@ -7,6 +7,7 @@ import { Lock } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import EditPlaylist from "@/components/EditPlaylist";
 
 export default async function Playlist({ params }: { params: { id: string } }) {
     const res = await fetchHttp(`/playlist/${params.id}`, {
@@ -26,13 +27,13 @@ export default async function Playlist({ params }: { params: { id: string } }) {
     }
 
     return (
-        <Main classname="max-w-[1000px] mx-auto">
+        <Main classname="max-w-[1000px] mx-auto p-[25px]">
             <div className="row justify-between w-full">
-                <h1 className="text-3xl font-medium mr-auto">{playlist.name}</h1>
+                <h1 className="text-3xl font-medium mr-auto overflow-hidden max-w-[70%]">{playlist.name}</h1>
                 {playlist.isPrivate ? <Lock size={24} /> : <Eye size={24} />}
             </div>
             <p style={styles}>{playlist.createdDate.slice(0, 10)}</p>
-            <Link href={`/@${playlist.author.username}`} className="row mr-auto mb-8">
+            <Link href={`/@${playlist.author.username}`} className="row mr-auto mb-4">
                 <Avatar className="w-8 h-8 mr-2">
                     <AvatarImage
                         src={`${process.env.NEXT_PUBLIC_API_URL}/user/${playlist.author.username}/avatar`}
@@ -44,6 +45,7 @@ export default async function Playlist({ params }: { params: { id: string } }) {
                 </Avatar>
                 {playlist.author.username}
             </Link>
+            <EditPlaylist playlist={playlist} />
             {playlist.videos.map((v: any) => {
                 return <PlaylistVideoRow video={v} playlist={playlist} key={v.id} />;
             })}
