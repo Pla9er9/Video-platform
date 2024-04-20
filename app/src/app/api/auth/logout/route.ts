@@ -4,7 +4,7 @@ import { permanentRedirect } from "next/navigation";
 
 export async function POST(request: Request) {
     const cookieStore = cookies();
-    const token = cookieStore.get('jwtToken')
+    const token = cookieStore.get('token')
 
     if (!token) {
         return new Response('', {status: 401})
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
         });
     }
 
-    cookieStore.delete("jwtToken");
+    cookieStore.delete("token");
     cookieStore.delete("username");
 
     permanentRedirect("/")

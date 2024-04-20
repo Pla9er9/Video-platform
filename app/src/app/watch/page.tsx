@@ -22,7 +22,7 @@ export default async function Watch({
 }: {
     searchParams?: { [key: string]: string | undefined };
 }) {
-    const token = cookies().get("jwtToken")?.value;
+    const token = cookies().get("token")?.value;
 
     async function getData(id: string) {
         const res = await fetchHttp(`/video/${id}`, {

@@ -18,8 +18,8 @@ export default function RootLayout({
 }>) {
 
     const cookieStore = cookies()
-    const jwt = cookieStore.get('jwtToken')?.value
-    const username = jwt ? cookieStore.get('username')?.value : undefined
+    const token = cookieStore.get('token')?.value
+    const username = token ? cookieStore.get('username')?.value : undefined
 
     return (
         <html lang="en">
@@ -30,7 +30,7 @@ export default function RootLayout({
                 )}
             >
                 <Providers>
-                    <MenuPageSwitch token={jwt} username={username}>
+                    <MenuPageSwitch token={token} username={username}>
                         {children}
                         <Toaster />
                     </MenuPageSwitch>

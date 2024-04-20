@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     var a = new Date();
     a = new Date(a.getTime() + 1000 * 60 * 60 * 24 * 365);
-    cookieStore.set("jwtToken", json.token, {
+    cookieStore.set("token", json.token, {
         secure: true,
         httpOnly: true,
         expires: a,

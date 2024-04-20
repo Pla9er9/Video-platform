@@ -9,7 +9,7 @@ export async function PATCH(request: Request) {
         method: "PATCH",
         body: JSON.stringify(data),
         server: true,
-        token: cookieStore.get('jwtToken')?.value,
+        token: cookieStore.get('token')?.value,
     });
 
     if (!res.ok) {

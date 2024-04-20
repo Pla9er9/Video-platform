@@ -11,7 +11,7 @@ import EditPlaylist from "@/components/EditPlaylist";
 
 export default async function Playlist({ params }: { params: { id: string } }) {
     const res = await fetchHttp(`/playlist/${params.id}`, {
-        token: cookies().get("jwtToken"),
+        token: cookies().get("token"),
     });
 
     if (!res.ok) {

@@ -18,7 +18,7 @@ export default async function Page({
 
     const cookieStore = cookies()
     const res = await fetchHttp(`/user/${params.username.slice(3)}`, {
-        token: cookieStore.get('jwtToken')?.value
+        token: cookieStore.get('token')?.value
     });
     
     if (!res.ok) {
