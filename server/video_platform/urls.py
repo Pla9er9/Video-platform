@@ -6,6 +6,7 @@ from django.urls import path
 urlpatterns = [
     path('login', views.login),
     path('signup', views.signup),
+    path('logout', views.logout),
     path('account/videos', video.getAccountVideos),
     path('account/playlists', video.getAccountPlaylist),
     path('account/avatar', views.uploadAvatar),
@@ -32,5 +33,6 @@ urlpatterns = [
     path("playlist/new", video.newPlaylist),
     path("playlist/<uuid:id>", video.getPlaylist),
     path("playlist/<uuid:id>/add", video.addToPlaylist),
+    path("playlist/<uuid:id>/video/<uuid:videoId>", video.removeVideoFromPlaylist),
     path("playlist/<uuid:id>/delete", video.deletePlaylist),
 ]
