@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer
-
+from django.contrib.auth import logout as django_logout
 
 @api_view(['POST'])
 def login(request):
@@ -36,6 +36,15 @@ def signup(request):
     token = Token.objects.create(user=user)
     return Response({'token': token.key, 'user': serializer.data})
 
+@api_view(['POST'])
+def logout(request):
+    try:
+        request.user.auth_token.delete()
+    except (AttributeError):
+        pass
+
+    django_logout(request)
+    return Response(status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def search(request):
