@@ -255,12 +255,7 @@ def deleteVideo(request, id):
 @ api_view(['GET'])
 def getComments(request, id):
     comments = []
-    replyingTo = request.GET.get('replyingTo')
-    if (replyingTo):
-        comments = Comment.objects.filter(
-            video__id=id, video__isPrivate=False, replyingTo__id=replyingTo)
-    else:
-        comments = Comment.objects.filter(video__id=id, video__isPrivate=False)
+    comments = Comment.objects.filter(video__id=id, video__isPrivate=False)
 
     return Response([commentToDto(c) for c in comments])
 
@@ -281,6 +276,25 @@ def postComment(request, id):
         author=request.user, replyingTo=request.POST.get('replyingTo'), video=video)
     return Response(commentToDto(comment))
 
+@ api_view(['DELETE'])
+@ authentication_classes([SessionAuthentication, TokenAuthentication])
+@ permission_classes([IsAuthenticated])
+def deleteComment(request, id, commentId):
+    video = get_object_or_404(Video, id=id)
+    if (video.isPrivate):
+        return Response(status=404)
+    
+    comment = get_object_or_404(Comment, id=commentId)
+    
+    if comment.video.id != video.id:
+        return Response(status=404)
+    
+    if comment.author.id != request.user.id:
+        return Response(status=403)
+    
+
+    comment.delete()
+    return Response()
 
 @api_view(['GET'])
 def getPlaylist(request, id):
@@ -398,7 +412,6 @@ def commentToDto(comment: Comment):
         "id": comment.id,
         "text": comment.text,
         "postedDate": comment.postedDate,
-        "hasReplays": comment.hasReplays,
         "author": {
             "username": comment.author.username
         }

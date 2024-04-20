@@ -26,6 +26,7 @@ urlpatterns = [
     path("video/<uuid:id>/delete", video.deleteVideo),
     path("video/<uuid:id>/comments", video.getComments),
     path("video/<uuid:id>/comments/new", video.postComment),
+    path("video/<uuid:id>/comments/<uuid:commentId>", video.deleteComment),
     path("search", views.search),
     path("user/<str:username>", user.getUser),
     path("user/<str:username>/avatar", user.getUserAvatar),
