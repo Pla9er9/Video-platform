@@ -96,7 +96,7 @@ def likeVideo(request, id):
     video = get_object_or_404(Video, id=id)
     if video.isPrivate:
         return Response(status=404)
-    
+
     Reaction.objects.filter(reaction_video_id=id,
                             account_id=request.user.id).delete()
     r = Reaction.objects.create(
@@ -220,6 +220,7 @@ def getVideoStream(request, id):
         max_load_volume=max_load_volume,
     )
 
+
 @ api_view(['PATCH'])
 @ authentication_classes([SessionAuthentication, TokenAuthentication])
 @ permission_classes([IsAuthenticated])
@@ -232,12 +233,13 @@ def editVideoData(request, id):
 
     if (not title or not description or not isPrivate or title == ""):
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    
+
     v.title = title
     v.description = description
     v.isPrivate = isPrivate
     v.save()
     return Response({"id": videoToDto(v)})
+
 
 @ api_view(['DELETE'])
 @ authentication_classes([SessionAuthentication, TokenAuthentication])
@@ -248,6 +250,7 @@ def deleteVideo(request, id):
         return Response(status=403)
     v.delete()
     return Response()
+
 
 @ api_view(['GET'])
 def getComments(request, id):
@@ -324,6 +327,21 @@ def addToPlaylist(request, id):
     return Response()
 
 
+@api_view(['DELETE'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def removeVideoFromPlaylist(request, id, videoId):
+    playlist = get_object_or_404(Playlist, id=id)
+    if playlist.author.id != request.user.id:
+        return Response(status=403)
+
+    video = get_object_or_404(Video, id=videoId)
+    playlist.videos.remove(video)
+    playlist.save()
+
+    return Response()
+
+
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -335,6 +353,7 @@ def newPlaylist(request):
     p.save()
     return Response(playlistToDto(Playlist.objects.get(name=request.data["name"])))
 
+
 @api_view(['DELETE'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -342,6 +361,7 @@ def deletePlaylist(request, id):
     playlist = get_object_or_404(Playlist, id=id)
     playlist.delete()
     return Response()
+
 
 def playlistToDto(playlist: Playlist):
     return {
