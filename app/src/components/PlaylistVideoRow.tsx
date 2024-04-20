@@ -39,6 +39,7 @@ export default function PlaylistVideoRow(props: { video: any; playlist: any }) {
         <div
             className="row w-full my-4"
             id={`playlistVideoRow-${props.video.id}`}
+            style={{borderRight: "solid 1px gray"}}
         >
             <Link href={`/watch?videoId=${props.video.id}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
@@ -56,7 +57,7 @@ export default function PlaylistVideoRow(props: { video: any; playlist: any }) {
                 <p>{props.video.views} views</p>
             </div>
             {props.playlist.author.username === getCookie("username") ? (
-                <Button size="icon" variant="ghost" className="ml-auto" onClick={removeVideoFromPlaylist}>
+                <Button size="icon" variant="ghost" className="ml-auto mr-4" onClick={removeVideoFromPlaylist}>
                     <Trash size={18} />
                 </Button>
             ) : (
