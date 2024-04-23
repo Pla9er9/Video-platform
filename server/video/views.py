@@ -21,10 +21,7 @@ allowedVideoFormats = ["mp4"]
 
 @api_view(['GET'])
 def getAllVideos(request):
-    pageNumber = request.GET.get('page')
-    if not pageNumber:
-        pageNumber = 1
-
+    pageNumber = getPageNumberFromGetRequest(request)
     videos = Video.objects.filter(isPrivate=False)
     dtos = [videoToDto(v) for v in videos]
     page = Paginator(dtos, 25)
@@ -48,10 +45,7 @@ def createVideo(request):
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAccountVideos(request):
-    pageNumber = request.GET.get('page')
-    if not pageNumber:
-        pageNumber = 1
-
+    pageNumber = getPageNumberFromGetRequest(request)
     videos = Video.objects.filter(creator__username=request.user.username)
     dtos = [{**videoToDto(v), **{"description": v.description}}
                           for v in videos]
@@ -62,10 +56,7 @@ def getAccountVideos(request):
 
 @api_view(['GET'])
 def getUsersVideos(request, username):
-    pageNumber = request.GET.get('page')
-    if not pageNumber:
-        pageNumber = 1
-
+    pageNumber = getPageNumberFromGetRequest(request)
     videos = Video.objects.filter(isPrivate=False, creator__username=username)
     dtos = [videoToDto(v) for v in videos]
     page = Paginator(dtos, 20)
@@ -75,10 +66,7 @@ def getUsersVideos(request, username):
 
 @api_view(['GET'])
 def getUsersPlaylists(request, username):
-    pageNumber = request.GET.get('page')
-    if not pageNumber:
-        pageNumber = 1
-
+    pageNumber = getPageNumberFromGetRequest(request)
     playlists = Playlist.objects.filter(isPrivate=False, author__username=username)
     dtos = [playlistToDto(v) for v in playlists]
     page = Paginator(dtos, 20)
@@ -287,10 +275,7 @@ def deleteVideo(request, id):
 
 @ api_view(['GET'])
 def getComments(request, id):
-    pageNumber = request.GET.get('page')
-    if not pageNumber:
-        pageNumber = 1
-
+    pageNumber = getPageNumberFromGetRequest(request)
     comments = Comment.objects.filter(video__id=id, video__isPrivate=False)
     dtos = [commentToDto(c) for c in comments]
     page = Paginator(dtos, 20)
@@ -358,10 +343,7 @@ def getPlaylist(request, id):
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAccountPlaylist(request):
-    pageNumber = request.GET.get('page')
-    if not pageNumber:
-        pageNumber = 1
-
+    pageNumber = getPageNumberFromGetRequest(request)
     playlists = Playlist.objects.filter(author__id=request.user.id)
     dtos = [playlistToDto(p) for p in playlists]
     page = Paginator(dtos, 20)
@@ -444,6 +426,11 @@ def deletePlaylist(request, id):
     playlist.delete()
     return Response()
 
+def getPageNumberFromGetRequest(request) -> int:
+    pageNumber = request.GET.get('page')
+    if not pageNumber:
+        return 1
+    return pageNumber
 
 def playlistToDto(playlist: Playlist):
     return {
