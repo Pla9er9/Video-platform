@@ -9,6 +9,7 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from video_platform.dtoMappers import *
 from video_platform.serializers import CommentSerializer, VideoSerializer
 from django.shortcuts import get_object_or_404
 from .models import Playlist, Reaction, Video, Comment
@@ -48,7 +49,7 @@ def getAccountVideos(request):
     pageNumber = getPageNumberFromGetRequest(request)
     videos = Video.objects.filter(creator__username=request.user.username)
     dtos = [{**videoToDto(v), **{"description": v.description}}
-                          for v in videos]
+            for v in videos]
     page = Paginator(dtos, 20)
     requestedPage = page.page(pageNumber)
     return Response(pageToJson(requestedPage))
@@ -67,7 +68,8 @@ def getUsersVideos(request, username):
 @api_view(['GET'])
 def getUsersPlaylists(request, username):
     pageNumber = getPageNumberFromGetRequest(request)
-    playlists = Playlist.objects.filter(isPrivate=False, author__username=username)
+    playlists = Playlist.objects.filter(
+        isPrivate=False, author__username=username)
     dtos = [playlistToDto(v) for v in playlists]
     page = Paginator(dtos, 20)
     requestedPage = page.page(pageNumber)
@@ -89,25 +91,12 @@ def getVideoData(request, id):
         reaction_video_id=id, account_id=request.user.id)
     dislikes = Reaction.objects.filter(
         reaction_video_id=id, variant="dislike").count()
-
+    likes = Reaction.objects.filter(reaction_video_id=id).count() - dislikes
     variant = None
     if reaction:
         variant = reaction.first().variant
 
-    return Response({
-        "id": video.id,
-        "title": video.title,
-        "description": video.description,
-        "isPrivate": video.isPrivate,
-        "created": video.created,
-        "views": video.views,
-        "likes": Reaction.objects.filter(reaction_video_id=id).count() - dislikes,
-        "dislikes": dislikes,
-        "reaction": variant,
-        "creator": {
-            "username": video.creator.username
-        }
-    })
+    return Response(videoToDto(video, likes, dislikes, variant))
 
 
 @api_view(['POST'])
@@ -426,48 +415,9 @@ def deletePlaylist(request, id):
     playlist.delete()
     return Response()
 
+
 def getPageNumberFromGetRequest(request) -> int:
     pageNumber = request.GET.get('page')
     if not pageNumber:
         return 1
     return pageNumber
-
-def playlistToDto(playlist: Playlist):
-    return {
-        "id": playlist.id,
-        "name": playlist.name,
-        "isPrivate": playlist.isPrivate,
-        "createdDate": playlist.createdDate,
-        "videos": playlist.videos.all().count()
-    }
-
-
-def commentToDto(comment: Comment):
-    return {
-        "id": comment.id,
-        "text": comment.text,
-        "postedDate": comment.postedDate,
-        "author": {
-            "username": comment.author.username
-        }
-    }
-
-
-def videoToDto(video: Video):
-    return {
-        "id": video.id,
-        "title": video.title,
-        "created": video.created,
-        "views": video.views,
-        "creator": {
-            "username": video.creator.username
-        }
-    }
-
-
-def pageToJson(page):
-    return {
-        "content": page.object_list,
-        "has_next": page.has_next(),
-        "page_number": page.number
-    }

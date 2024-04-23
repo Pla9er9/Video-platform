@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from video_platform.dtoMappers import userToDto
 from user.models import UserProfile
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
@@ -18,17 +19,7 @@ def getUser(request, username):
         if request.user.subscribing.contains(user):
             isSub = True
 
-
-    return Response({
-        "id": user.id,
-        "username": user.username,
-        "email": user.email,
-        "firstname": user.first_name,
-        "date_joined": user.date_joined,
-        "subscriptions": len(user.subscriptions.all()),
-        "description": user.description,
-        "subscribing": isSub
-    })
+    return Response(userToDto(user, isSub))
 
 
 @api_view(['POST'])
