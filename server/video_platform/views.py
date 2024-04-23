@@ -47,7 +47,7 @@ def logout(request):
         pass
 
     django_logout(request)
-    return Response(status=status.HTTP_200_OK)
+    return Response()
 
 
 @api_view(['PATCH'])
