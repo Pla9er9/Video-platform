@@ -10,7 +10,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import VideoRecommendation from "./VideoRecommendation";
+import VideoCard from "./VideoCard";
 import { useEffect, useRef, useState } from "react";
 import { Calendar, Mail, Users } from "lucide-react";
 import "./UserSubpages.scss";
@@ -105,7 +105,7 @@ export default function UserSubpages(props: {
                 {step === "videos" ? (
                     <>
                         {videosPage.content.map((e: any) => (
-                            <VideoRecommendation
+                            <VideoCard
                                 data={e}
                                 key={e.id}
                                 withoutCreator={true}

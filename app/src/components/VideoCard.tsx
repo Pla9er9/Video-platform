@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import "./VideoRecommendations.scss";
+import "./VideoCard.scss";
 
-export default function VideoRecommendation(props: {
+export default function VideoCard(props: {
     data: any;
     withoutCreator?: boolean;
 }) {
     return (
-        <div className={`videoRecommendation column ${props.withoutCreator ? "pb-3" : "pb-4"}`}>
+        <div className={`videoCard column ${props.withoutCreator ? "pb-3" : "pb-4"}`}>
             <Link
                 href={"/watch?videoId=" + props.data.id}
                 className="miniature"

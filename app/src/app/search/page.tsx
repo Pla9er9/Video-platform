@@ -4,7 +4,7 @@ import Main from "@/components/Main";
 import SearchSkeleton from "@/components/SearchSkeleton";
 import { Input } from "@/components/ui/input";
 import UserProfileSearchResult from "@/components/UserProfileSearchResult";
-import VideoRecommendation from "@/components/VideoRecommendation";
+import VideoCard from "@/components/VideoCard";
 import fetchHttp from "@/lib/fetchHttp";
 import { useEffect, useState } from "react";
 
@@ -59,7 +59,7 @@ export default function Search() {
                             style={{ justifyContent: "center" }}
                         >
                             {data.videos.map((v: any) => (
-                                <VideoRecommendation data={v} key={v.id} />
+                                <VideoCard data={v} key={v.id} />
                             ))}
                         </div>
                     </>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import VideoRecommendation from "./VideoRecommendation";
+import VideoCard from "./VideoCard";
 import { useToast } from "./ui/use-toast";
 import fetchHttp from "@/lib/fetchHttp";
 import { Button } from "./ui/button";
@@ -33,7 +33,7 @@ export default function HomePageVideos(props: { videosPage: any }) {
     return (
         <div className="flex w-[93vw] h-full flex-wrap justify-center">
             {videosPage.content.map((e: any) => (
-                <VideoRecommendation data={e} key={e.id} />
+                <VideoCard data={e} key={e.id} />
             ))}
             <div className="w-full flex">
                 {videosPage.has_next ? (
