@@ -2,9 +2,7 @@
 
 import Main from "@/components/Main";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import fetchHttp from "@/lib/fetchHttp";
 import { RootState } from "@/lib/store";
 import { useEffect, useState } from "react";
@@ -12,19 +10,7 @@ import { useSelector } from "react-redux";
 import { useToast } from "@/components/ui/use-toast";
 import PlaylistRow from "@/components/PlaylistRow";
 import VideoRowWithControls from "@/components/VideoRowWithControls";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
-import Image from "next/image";
-import { Label } from "@/components/ui/label";
+import MainSettings from "@/components/Settings";
 
 export default function Settings() {
     const store = useSelector((state: RootState) => state.token);
@@ -32,87 +18,7 @@ export default function Settings() {
     const [playlistsPage, setPlaylistsPage] = useState<any | null>(null);
     const [account, setAccount] = useState<any | null>(null);
     const [step, setStep] = useState("account");
-    const [avatar, setAvatar] = useState<File | null>(null);
     const { toast } = useToast();
-    const pClasses = "text-2xl text-white my-4";
-
-    const formSchema = z.object({
-        username: z
-            .string()
-            .min(2, {
-                message: "Username must be at least 2 characters.",
-            })
-            .max(12, {
-                message: "Username must be max 12 characters",
-            }),
-        email: z.string().email(),
-        firstname: z
-            .string()
-            .min(2, {
-                message: "Name must be at least 2 characters",
-            })
-            .max(12, {
-                message: "Name must be max 12 characters",
-            }),
-        description: z.string(),
-    });
-
-    let form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            username: "",
-            email: "",
-            firstname: "",
-            description: "",
-        },
-    });
-
-    async function onSubmit(values: z.infer<typeof formSchema>) {
-        let res = await fetchHttp("/api/auth/edit", {
-            method: "PATCH",
-            body: JSON.stringify({
-                username: values.username,
-                first_name: values.firstname,
-                email: values.email,
-                description: values.description,
-            }),
-            apiUrlPrefix: false,
-        });
-
-        if (!res.ok) {
-            toast({
-                variant: "destructive",
-                title: "Changes failed to save",
-            });
-        }
-
-        if (!avatar) {
-            toast({
-                title: "Changes saved",
-            });
-            return;
-        }
-
-        let formData = new FormData();
-        formData.append("file", avatar);
-        res = await fetchHttp(`/account/avatar`, {
-            method: "POST",
-            token: store.value,
-            body: formData,
-            stringify: false,
-            noContentType: true,
-        });
-        if (!res.ok) {
-            toast({
-                variant: "destructive",
-                title: "Avatar failed to save",
-            });
-        }
-
-        toast({
-            title: "Changes saved",
-        });
-    }
 
     async function loadAccountData() {
         if (account) return;
@@ -173,50 +79,9 @@ export default function Settings() {
         }
     }
 
-    async function deleteAvatar() {
-        const res = await fetchHttp("account/avatar/delete", {
-            method: "DELETE",
-            token: store.value,
-        });
-
-        if (!res.ok) {
-            toast({
-                variant: "destructive",
-                title: "Could not delete avatar, try later",
-            });
-        } else {
-            toast({
-                title: "Avatar deleted",
-            });
-        }
-    }
-
-    async function logout() {
-        const res = await fetchHttp("/api/auth/logout", {
-            method: "POST",
-            apiUrlPrefix: false,
-            redirecting: true,
-        });
-        if (!res.ok) {
-            toast({
-                variant: "destructive",
-                title: "Could not logout, try later",
-            });
-        }
-    }
-
     useEffect(() => {
         loadAccountData();
     }, []);
-
-    useEffect(() => {
-        if (!account) return;
-
-        form.setValue("username", account.username);
-        form.setValue("email", account.email);
-        form.setValue("firstname", account.firstname);
-        form.setValue("description", account.description);
-    }, [account, form]);
 
     return (
         <Main classname="p-4">
@@ -267,141 +132,7 @@ export default function Settings() {
                     <></>
                 )}
                 {step === "account" && account ? (
-                    <div
-                        className="column space-y-4 w-[100%] max-w-[500px]"
-                        style={{ alignItems: "flex-start" }}
-                    >
-                        <p className={pClasses}>Account data</p>
-                        <Label htmlFor="avatarManagmentRow">Avatar</Label>
-                        <div className="row space-x-4" id="avatarManagmentRow">
-                            {avatar ? (
-                                <Image
-                                    width={40}
-                                    height={40}
-                                    src={window.URL.createObjectURL(avatar)}
-                                    style={{
-                                        marginLeft: "20px",
-                                        borderRadius: "100%",
-                                        maxWidth: "60px",
-                                        minWidth: "60px",
-                                        height: "60px",
-                                    }}
-                                    alt="New Avatar"
-                                    onClick={() => setAvatar(null)}
-                                />
-                            ) : (
-                                <></>
-                            )}
-                            <Label
-                                htmlFor="avatarInput"
-                                className="border column w-[130px] h-[40px] rounded-md border-input bg-background cursor-pointer"
-                            >
-                                <span className="mt-3">Upload avatar</span>
-                                <Input
-                                    id="avatarInput"
-                                    onChange={(e) => {
-                                        if (e.target.files)
-                                            setAvatar(e.target.files[0]);
-                                    }}
-                                    style={{ height: "40px", display: "none" }}
-                                    type="file"
-                                    accept="image/*"
-                                />
-                            </Label>
-                            <Button variant="outline" onClick={deleteAvatar}>
-                                Delete avatar
-                            </Button>
-                        </div>
-                        <Form {...form}>
-                            <form
-                                onSubmit={form.handleSubmit(onSubmit)}
-                                className="space-y-8 w-full"
-                            >
-                                <FormField
-                                    control={form.control}
-                                    name="username"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Username</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="My username"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="email"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Email</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="example@mail.com"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="firstname"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Firstname</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="Alex"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="description"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Description</FormLabel>
-                                            <FormControl>
-                                                <Textarea
-                                                    placeholder="Interesting description"
-                                                    {...field}
-                                                    style={{
-                                                        resize: "none",
-                                                        height: "120px",
-                                                    }}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <Button type="submit">Save</Button>
-                            </form>
-                        </Form>
-                        <div
-                            className="row w-full"
-                            style={{ justifyContent: "space-between" }}
-                        >
-                            <p className={pClasses + " mt-8"}>Logout</p>
-                            <Button
-                                variant="outline"
-                                className="w-[85px] text-red-600"
-                                onClick={logout}
-                            >
-                                Logout
-                            </Button>
-                        </div>
-                    </div>
+                    <MainSettings accountData={account} />
                 ) : (
                     <></>
                 )}
