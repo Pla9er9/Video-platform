@@ -30,7 +30,7 @@ export default function Comment(props: { data: any }) {
     }
 
     return (
-        <div className="column my-6" id={`comment-${props.data.id}`} style={{ alignItems: "flex-start" }}>
+        <div className="column my-6 w-full" id={`comment-${props.data.id}`} style={{ alignItems: "flex-start" }}>
             <div className="row w-full" style={{ alignItems: "flex-start" }}>
                 <Link href={`/@${props.data.author.username}`}>
                     <Avatar style={{ width: "35px", height: "35px" }}>

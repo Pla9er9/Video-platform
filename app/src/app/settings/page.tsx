@@ -28,8 +28,8 @@ import { Label } from "@/components/ui/label";
 
 export default function Settings() {
     const store = useSelector((state: RootState) => state.token);
-    const [videos, setVideos] = useState<any[] | null>(null);
-    const [playlists, setPlaylists] = useState<any[] | null>(null);
+    const [videosPage, setVideosPage] = useState<any | null>(null);
+    const [playlistsPage, setPlaylistsPage] = useState<any | null>(null);
     const [account, setAccount] = useState<any | null>(null);
     const [step, setStep] = useState("account");
     const [avatar, setAvatar] = useState<File | null>(null);
@@ -90,8 +90,8 @@ export default function Settings() {
             toast({
                 title: "Changes saved",
             });
-            return
-        };
+            return;
+        }
 
         let formData = new FormData();
         formData.append("file", avatar);
@@ -124,28 +124,47 @@ export default function Settings() {
         }
     }
 
-    async function loadVideos() {
-        if (videos) return;
-        const res = await fetchHttp(`/account/videos`, {
-            token: store.value,
-        });
+    async function loadVideos({ loadOnlyOnce = false }) {
+        if (videosPage && loadOnlyOnce) return;
+        const res = await fetchHttp(
+            `/account/videos?page=${
+                videosPage ? videosPage.page_number + 1 : 1
+            }`,
+            {
+                token: store.value,
+            }
+        );
         if (res.ok) {
-            setVideos(res.body);
+            if (videosPage) {
+                res.body.content = [...videosPage.content, ...res.body.content];
+            }
+            setVideosPage(res.body);
         } else {
             toast({
                 variant: "destructive",
-                title: "Could not load video",
+                title: "Could not load videos",
             });
         }
     }
 
-    async function loadPlaylists() {
-        if (playlists) return;
-        const res = await fetchHttp(`/account/playlists`, {
-            token: store.value,
-        });
+    async function loadPlaylists({ loadOnlyOnce = false }) {
+        if (playlistsPage && loadOnlyOnce) return;
+        const res = await fetchHttp(
+            `/account/playlists?page=${
+                playlistsPage ? playlistsPage.page_number + 1 : 1
+            }`,
+            {
+                token: store.value,
+            }
+        );
         if (res.ok) {
-            setPlaylists(res.body);
+            if (playlistsPage) {
+                res.body.content = [
+                    ...playlistsPage.content,
+                    ...res.body.content,
+                ];
+            }
+            setPlaylistsPage(res.body);
         } else {
             toast({
                 variant: "destructive",
@@ -209,20 +228,41 @@ export default function Settings() {
                 >
                     <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="account">Account</TabsTrigger>
-                        <TabsTrigger value="videos" onClick={loadVideos}>
+                        <TabsTrigger
+                            value="videos"
+                            onClick={() => loadVideos({ loadOnlyOnce: true })}
+                        >
                             Videos
                         </TabsTrigger>
-                        <TabsTrigger value="playlists" onClick={loadPlaylists}>
+                        <TabsTrigger
+                            value="playlists"
+                            onClick={() =>
+                                loadPlaylists({ loadOnlyOnce: true })
+                            }
+                        >
                             Playlists
                         </TabsTrigger>
                     </TabsList>
                 </Tabs>
             </div>
             <div className="row flex-wrap justify-center w-full max-w-[800px] py-8">
-                {step === "videos" && videos ? (
-                    videos.map((v) => {
-                        return <VideoRowWithControls video={v} key={v.id} />;
-                    })
+                {step === "videos" && videosPage ? (
+                    <>
+                        {videosPage.content.map((v: any) => (
+                            <VideoRowWithControls video={v} key={v.id} />
+                        ))}
+                        {videosPage.has_next ? (
+                            <Button
+                                variant="outline"
+                                className="mx-auto"
+                                onClick={() => loadVideos({})}
+                            >
+                                Load more
+                            </Button>
+                        ) : (
+                            <></>
+                        )}
+                    </>
                 ) : (
                     <></>
                 )}
@@ -365,11 +405,22 @@ export default function Settings() {
                 ) : (
                     <></>
                 )}
-                {step === "playlists" && playlists ? (
+                {step === "playlists" && playlistsPage ? (
                     <div className="column w-full">
-                        {playlists.map((p) => (
+                        {playlistsPage.content.map((p: any) => (
                             <PlaylistRow playlist={p} key={p.id} />
                         ))}
+                        {playlistsPage.has_next ? (
+                            <Button
+                                variant="outline"
+                                className="mx-auto mt-12"
+                                onClick={() => loadPlaylists({})}
+                            >
+                                Load more
+                            </Button>
+                        ) : (
+                            <></>
+                        )}
                     </div>
                 ) : (
                     <></>

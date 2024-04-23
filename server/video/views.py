@@ -13,7 +13,7 @@ from video_platform.serializers import CommentSerializer, VideoSerializer
 from django.shortcuts import get_object_or_404
 from .models import Playlist, Reaction, Video, Comment
 from sage_stream.utils.stream_services import get_streaming_response
-from django.db.models import Q
+from django.core.paginator import Paginator
 
 allowedMiniatureFormats = ["png", "jpg"]
 allowedVideoFormats = ["mp4"]
@@ -21,9 +21,15 @@ allowedVideoFormats = ["mp4"]
 
 @api_view(['GET'])
 def getAllVideos(request):
+    pageNumber = request.GET.get('page')
+    if not pageNumber:
+        pageNumber = 1
+
     videos = Video.objects.filter(isPrivate=False)
-    res = [videoToDto(v) for v in videos]
-    return Response(res)
+    dtos = [videoToDto(v) for v in videos]
+    page = Paginator(dtos, 25)
+    requestedPage = page.page(pageNumber)
+    return Response(pageToJson(requestedPage))
 
 
 @api_view(['POST'])
@@ -42,15 +48,28 @@ def createVideo(request):
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAccountVideos(request):
+    pageNumber = request.GET.get('page')
+    if not pageNumber:
+        pageNumber = 1
+
     videos = Video.objects.filter(creator__username=request.user.username)
-    return Response([{**videoToDto(v), **{"description": v.description}} for v in videos])
+    dtos = [{**videoToDto(v), **{"description": v.description}} for v in videos]
+    page = Paginator(dtos, 20)
+    requestedPage = page.page(pageNumber)
+    return Response(pageToJson(requestedPage))
 
 
 @api_view(['GET'])
 def getUsersVideos(request, username):
+    pageNumber = request.GET.get('page')
+    if not pageNumber:
+        pageNumber = 1
+
     videos = Video.objects.filter(isPrivate=False, creator__username=username)
-    res = [videoToDto(v) for v in videos]
-    return Response(res)
+    dtos = [videoToDto(v) for v in videos]
+    page = Paginator(dtos, 20)
+    requestedPage = page.page(pageNumber)
+    return Response(pageToJson(requestedPage))
 
 
 @api_view(['GET'])
@@ -254,10 +273,15 @@ def deleteVideo(request, id):
 
 @ api_view(['GET'])
 def getComments(request, id):
-    comments = []
-    comments = Comment.objects.filter(video__id=id, video__isPrivate=False)
+    pageNumber = request.GET.get('page')
+    if not pageNumber:
+        pageNumber = 1
 
-    return Response([commentToDto(c) for c in comments])
+    comments = Comment.objects.filter(video__id=id, video__isPrivate=False)
+    dtos = [commentToDto(c) for c in comments]
+    page = Paginator(dtos, 20)
+    requestedPage = page.page(pageNumber)
+    return Response(pageToJson(requestedPage))
 
 
 @ api_view(['POST'])
@@ -319,8 +343,15 @@ def getPlaylist(request, id):
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def getAccountPlaylist(request):
+    pageNumber = request.GET.get('page')
+    if not pageNumber:
+        pageNumber = 1
+
     playlists = Playlist.objects.filter(author__id=request.user.id)
-    return Response([playlistToDto(p) for p in playlists])
+    dtos = [playlistToDto(p) for p in playlists]
+    page = Paginator(dtos, 20)
+    requestedPage = page.page(pageNumber)
+    return Response(pageToJson(requestedPage))
 
 
 @api_view(['POST'])
@@ -427,4 +458,11 @@ def videoToDto(video: Video):
         "creator": {
             "username": video.creator.username
         }
+    }
+
+def pageToJson(page):
+    return {
+        "content": page.object_list,
+        "has_next": page.has_next(),
+        "page_number": page.number
     }

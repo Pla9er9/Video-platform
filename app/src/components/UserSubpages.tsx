@@ -12,9 +12,10 @@ import {
 import { Input } from "@/components/ui/input";
 import VideoRecommendation from "./VideoRecommendation";
 import { useEffect, useRef, useState } from "react";
-import { Calendar, Group, Mail, Users } from "lucide-react";
+import { Calendar, Mail, Users } from "lucide-react";
 import "./UserSubpages.scss";
-import { original } from "@reduxjs/toolkit";
+import { Button } from "./ui/button";
+import { useToast } from "./ui/use-toast";
 
 type stepType = "videos" | "playlists" | "informations";
 
@@ -22,39 +23,58 @@ export default function UserSubpages(props: {
     username: string;
     profileInformation: any;
 }) {
-    const [data, setData] = useState<any>(null);
+    const [videosPage, setVideosPage] = useState<any>(null);
     const [isLoading, setLoading] = useState(true);
     const [step, setStep] = useState<stepType>("videos");
-    const [value, setValue] = useState('');
+    const [value, setValue] = useState("");
     const iconSize = 22;
+    const { toast } = useToast()
 
-    const orginal = useRef()
+    const orginal = useRef();
+
+    async function loadVideos() {
+        const res = await fetchHttp(
+            `/user/${props.username}/videos?page=${
+                videosPage ? videosPage.page_number + 1 : 1
+            }`
+            , {}
+        );
+        if (res.ok) {
+            if (videosPage) {
+                res.body.content = [...videosPage.content, ...res.body.content];
+            }
+            setVideosPage(res.body);
+            orginal.current = res.body
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Could not load videos",
+            });
+        }
+    }
 
     useEffect(() => {
-        fetchHttp(`/user/${props.username}/videos`, {}).then((data) => {
-            if (data.ok) {
-                setData(data.body);
-                orginal.current = data.body
-            }
-            setLoading(false);
-        });
+        loadVideos()
+        setLoading(false);
     }, []);
 
     useEffect(() => {
         if (value !== "") {
-            fetchHttp(`/search?query=${value}&user=${props.username}`, {}).then((data) => {
-                if (data.ok) {
-                    setData(data.body.videos);
+            fetchHttp(`/search?query=${value}&user=${props.username}`, {}).then(
+                (data) => {
+                    if (data.ok) {
+                        setVideosPage({content: data.body.videos});
+                    }
+                    setLoading(false);
                 }
-                setLoading(false);
-            });
+            );
         } else {
-            setData(orginal.current)
+            setVideosPage(orginal.current);
         }
     }, [value]);
 
     if (isLoading) return <p>Loading...</p>;
-    if (!data) return <p>No videos</p>;
+    if (!videosPage) return <p>No videos</p>;
 
     return (
         <>
@@ -84,13 +104,26 @@ export default function UserSubpages(props: {
             <div className="flex w-[93vw] justify-center max-w-[1100px] flex-wrap">
                 {step === "videos" ? (
                     <>
-                        {data.map((e: any) => (
+                        {videosPage.content.map((e: any) => (
                             <VideoRecommendation
                                 data={e}
                                 key={e.id}
                                 withoutCreator={true}
                             />
                         ))}{" "}
+                        <div className="w-full flex">
+                            {videosPage.has_next ? (
+                                <Button
+                                    variant="outline"
+                                    className="mx-auto mt-12"
+                                    onClick={loadVideos}
+                                >
+                                    Load more
+                                </Button>
+                            ) : (
+                                <></>
+                            )}
+                        </div>
                     </>
                 ) : (
                     <></>
