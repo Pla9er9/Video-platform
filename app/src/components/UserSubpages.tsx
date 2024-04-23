@@ -16,6 +16,7 @@ import { Calendar, Mail, Users } from "lucide-react";
 import "./UserSubpages.scss";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
+import PlaylistRow from "./PlaylistRow";
 
 type stepType = "videos" | "playlists" | "informations";
 
@@ -24,27 +25,35 @@ export default function UserSubpages(props: {
     profileInformation: any;
 }) {
     const [videosPage, setVideosPage] = useState<any>(null);
+    const [playlistsPage, setPlaylistsPage] = useState<any>(null);
     const [isLoading, setLoading] = useState(true);
     const [step, setStep] = useState<stepType>("videos");
     const [value, setValue] = useState("");
     const iconSize = 22;
-    const { toast } = useToast()
+    const { toast } = useToast();
 
     const orginal = useRef();
+
+    function onSelectValueChange(step: stepType) {
+        setStep(step);
+        if (step === "playlists" && !playlistsPage) {
+            loadPlaylists();
+        }
+    }
 
     async function loadVideos() {
         const res = await fetchHttp(
             `/user/${props.username}/videos?page=${
                 videosPage ? videosPage.page_number + 1 : 1
-            }`
-            , {}
+            }`,
+            {}
         );
         if (res.ok) {
             if (videosPage) {
                 res.body.content = [...videosPage.content, ...res.body.content];
             }
             setVideosPage(res.body);
-            orginal.current = res.body
+            orginal.current = res.body;
         } else {
             toast({
                 variant: "destructive",
@@ -53,8 +62,31 @@ export default function UserSubpages(props: {
         }
     }
 
+    async function loadPlaylists() {
+        const res = await fetchHttp(
+            `/user/${props.username}/playlists?page=${
+                playlistsPage ? playlistsPage.page_number + 1 : 1
+            }`,
+            {}
+        );
+        if (res.ok) {
+            if (playlistsPage) {
+                res.body.content = [
+                    ...playlistsPage.content,
+                    ...res.body.content,
+                ];
+            }
+            setPlaylistsPage(res.body);
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Could not load playlists",
+            });
+        }
+    }
+
     useEffect(() => {
-        loadVideos()
+        loadVideos();
         setLoading(false);
     }, []);
 
@@ -63,7 +95,7 @@ export default function UserSubpages(props: {
             fetchHttp(`/search?query=${value}&user=${props.username}`, {}).then(
                 (data) => {
                     if (data.ok) {
-                        setVideosPage({content: data.body.videos});
+                        setVideosPage({ content: data.body.videos });
                     }
                     setLoading(false);
                 }
@@ -74,12 +106,11 @@ export default function UserSubpages(props: {
     }, [value]);
 
     if (isLoading) return <p>Loading...</p>;
-    if (!videosPage) return <p>No videos</p>;
 
     return (
         <>
             <div className="row justify-between w-full my-12 flex-wrap">
-                <Select onValueChange={(e: stepType) => setStep(e)}>
+                <Select onValueChange={onSelectValueChange}>
                     <SelectTrigger className="w-[220px] self-start row mt-2.5">
                         <SelectValue placeholder="Videos" />
                     </SelectTrigger>
@@ -102,7 +133,7 @@ export default function UserSubpages(props: {
                 </div>
             </div>
             <div className="flex w-[93vw] justify-center max-w-[1100px] flex-wrap">
-                {step === "videos" ? (
+                {step === "videos" && videosPage ? (
                     <>
                         {videosPage.content.map((e: any) => (
                             <VideoCard
@@ -154,6 +185,29 @@ export default function UserSubpages(props: {
                                 )}
                             </p>
                         </div>
+                    </div>
+                ) : (
+                    <></>
+                )}
+                {step === "playlists" && playlistsPage ? (
+                    <div
+                        className="column max-w-[800px] w-full mx-auto"
+                        style={{ alignItems: "flex-start" }}
+                    >
+                        {playlistsPage.content.map((p: any) => (
+                            <PlaylistRow playlist={p} key={p.id} />
+                        ))}
+                        {playlistsPage.has_next ? (
+                            <Button
+                                variant="outline"
+                                className="mx-auto mt-12"
+                                onClick={loadPlaylists}
+                            >
+                                Load more
+                            </Button>
+                        ) : (
+                            <></>
+                        )}
                     </div>
                 ) : (
                     <></>

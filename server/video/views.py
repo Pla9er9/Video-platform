@@ -53,7 +53,8 @@ def getAccountVideos(request):
         pageNumber = 1
 
     videos = Video.objects.filter(creator__username=request.user.username)
-    dtos = [{**videoToDto(v), **{"description": v.description}} for v in videos]
+    dtos = [{**videoToDto(v), **{"description": v.description}}
+                          for v in videos]
     page = Paginator(dtos, 20)
     requestedPage = page.page(pageNumber)
     return Response(pageToJson(requestedPage))
@@ -67,6 +68,19 @@ def getUsersVideos(request, username):
 
     videos = Video.objects.filter(isPrivate=False, creator__username=username)
     dtos = [videoToDto(v) for v in videos]
+    page = Paginator(dtos, 20)
+    requestedPage = page.page(pageNumber)
+    return Response(pageToJson(requestedPage))
+
+
+@api_view(['GET'])
+def getUsersPlaylists(request, username):
+    pageNumber = request.GET.get('page')
+    if not pageNumber:
+        pageNumber = 1
+
+    playlists = Playlist.objects.filter(isPrivate=False, author__username=username)
+    dtos = [playlistToDto(v) for v in playlists]
     page = Paginator(dtos, 20)
     requestedPage = page.page(pageNumber)
     return Response(pageToJson(requestedPage))
@@ -300,6 +314,7 @@ def postComment(request, id):
         author=request.user, video=video)
     return Response(commentToDto(comment))
 
+
 @ api_view(['DELETE'])
 @ authentication_classes([SessionAuthentication, TokenAuthentication])
 @ permission_classes([IsAuthenticated])
@@ -307,18 +322,18 @@ def deleteComment(request, id, commentId):
     video = get_object_or_404(Video, id=id)
     if (video.isPrivate):
         return Response(status=404)
-    
+
     comment = get_object_or_404(Comment, id=commentId)
-    
+
     if comment.video.id != video.id:
         return Response(status=404)
-    
+
     if comment.author.id != request.user.id:
         return Response(status=403)
-    
 
     comment.delete()
     return Response()
+
 
 @api_view(['GET'])
 def getPlaylist(request, id):
@@ -398,6 +413,7 @@ def newPlaylist(request):
     p.save()
     return Response(playlistToDto(Playlist.objects.get(name=request.data["name"])))
 
+
 @api_view(['PATCH'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -418,6 +434,7 @@ def editPlaylist(request, id):
     playlist.save()
 
     return Response()
+
 
 @api_view(['DELETE'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
@@ -459,6 +476,7 @@ def videoToDto(video: Video):
             "username": video.creator.username
         }
     }
+
 
 def pageToJson(page):
     return {

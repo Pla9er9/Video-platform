@@ -33,6 +33,7 @@ urlpatterns = [
     path("user/<str:username>/subscribe", user.subscribeUser),
     path("user/<str:username>/unsubscribe", user.unsubscribeUser),
     path("user/<str:username>/videos", video.getUsersVideos),
+    path("user/<str:username>/playlists", video.getUsersPlaylists),
     path("playlist/new", video.newPlaylist),
     path("playlist/<uuid:id>", video.getPlaylist),
     path("playlist/<uuid:id>/add", video.addToPlaylist),
