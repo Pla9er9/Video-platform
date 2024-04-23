@@ -36,7 +36,7 @@ export default function PlaylistRow(props: { playlist: any }) {
         <div className="row w-full my-2 flex-wrap videoInfo" id={`playlist-${props.playlist.id}`}>
             {props.playlist.isPrivate ? <Lock size={16} /> : <Eye size={16} />}
             <Link href={`/playlist/${props.playlist.id}`} className="mx-3 w-[140px] overflow-x-hidden">
-                <h1>{props.playlist.name}</h1>
+                <h1 className="text-[15px]">{props.playlist.name}</h1>
             </Link>
             <div className="column mx-auto w-[100px] overflow-hidden">
                 <p>{props.playlist.videos} videos</p>
