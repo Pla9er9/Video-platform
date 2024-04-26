@@ -102,10 +102,10 @@ def search(request):
         } for u in UserProfile.objects.filter(username__contains=query)[:3]]
     if user:
         videos = [videoToDto(v) for v in Video.objects.filter(
-            title__contains=query, creator__username=user)[:9]]
+            title__contains=query, creator__username=user, isPrivate=False)[:9]]
     else:
         videos = [videoToDto(v) for v in Video.objects.filter(
-            title__contains=query)[:9]]
+            title__contains=query, isPrivate=False)[:9]]
 
     return Response({
         'profiles': profiles,

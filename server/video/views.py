@@ -349,6 +349,9 @@ def addToPlaylist(request, id):
         return Response({"message": "VideoId query param not provided"}, status=400)
 
     playlist = get_object_or_404(Playlist, id=id)
+    if playlist.author.id != request.user.id:
+        return Response(status=403)
+    
     video = get_object_or_404(Video, id=videoId)
     if playlist.videos.contains(video):
         return Response()
@@ -412,6 +415,8 @@ def editPlaylist(request, id):
 @permission_classes([IsAuthenticated])
 def deletePlaylist(request, id):
     playlist = get_object_or_404(Playlist, id=id)
+    if playlist.author.id != request.user.id:
+        return Response(status=403)
     playlist.delete()
     return Response()
 
