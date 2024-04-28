@@ -81,7 +81,7 @@ def getUsersPlaylists(request, username):
 def getVideoData(request, id):
     video = get_object_or_404(Video, id=id)
 
-    if video.isPrivate:
+    if video.isPrivate and video.creator.id != request.user.id:
         return Response(status=404)
 
     video.views += 1
@@ -104,7 +104,7 @@ def getVideoData(request, id):
 @permission_classes([IsAuthenticated])
 def likeVideo(request, id):
     video = get_object_or_404(Video, id=id)
-    if video.isPrivate:
+    if video.isPrivate and video.creator.id != request.user.id:
         return Response(status=404)
 
     Reaction.objects.filter(reaction_video_id=id,
@@ -119,7 +119,7 @@ def likeVideo(request, id):
 @ permission_classes([IsAuthenticated])
 def dislikeVideo(request, id):
     video = get_object_or_404(Video, id=id)
-    if video.isPrivate:
+    if video.isPrivate and video.creator.id != request.user.id:
         return Response(status=404)
 
     Reaction.objects.filter(
@@ -195,7 +195,7 @@ def uploadMiniature(request, id):
 def getMiniature(request, id):
     video = get_object_or_404(Video, id=id)
 
-    if (video.isPrivate):
+    if video.isPrivate and video.creator.id != request.user.id:
         return Response(status=404)
 
     for format in allowedMiniatureFormats:
@@ -212,7 +212,7 @@ def getMiniature(request, id):
 def getVideoStream(request, id):
     video = get_object_or_404(Video, id=id)
 
-    if (video.isPrivate):
+    if video.isPrivate and video.creator.id != request.user.id:
         return Response(status=404)
 
     max_load_volume = settings.STREAM_MAX_LOAD_VOLUME
@@ -277,7 +277,7 @@ def getComments(request, id):
 @ permission_classes([IsAuthenticated])
 def postComment(request, id):
     video = get_object_or_404(Video, id=id)
-    if (video.isPrivate):
+    if video.isPrivate and video.creator.id != request.user.id:
         return Response(status=404)
 
     serializer = CommentSerializer(data=request.data)
@@ -294,7 +294,7 @@ def postComment(request, id):
 @ permission_classes([IsAuthenticated])
 def deleteComment(request, id, commentId):
     video = get_object_or_404(Video, id=id)
-    if (video.isPrivate):
+    if video.isPrivate and video.creator.id != request.user.id:
         return Response(status=404)
 
     comment = get_object_or_404(Comment, id=commentId)
@@ -313,7 +313,7 @@ def deleteComment(request, id, commentId):
 def getPlaylist(request, id):
     playlist = get_object_or_404(Playlist, id=id)
 
-    if playlist.isPrivate:
+    if playlist.isPrivate and playlist.author.id != request.user.id:
         return Response(status=404)
 
     return Response({
